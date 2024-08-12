@@ -21,7 +21,7 @@ func NewApiServer(port int) *APIServer {
 	}
 }
 
-func (s *APIServer) Start() {
+func (s *APIServer) Setup() {
 	baseGroup := s.engine.Group(viper.GetString("serviceBaseRoute"))
 	server.NewHealthHandler().RegisterRoutes(baseGroup)
 
@@ -29,7 +29,9 @@ func (s *APIServer) Start() {
 	{
 		server.NewDummyHandler().RegisterRoutes(v1Group)
 	}
+}
 
+func (s *APIServer) Start() {
 	err := s.engine.Run(fmt.Sprint(":", s.port))
 	if err != nil {
 		log.Fatal(err)
@@ -59,8 +61,10 @@ func initConfigFile(environment string) {
 
 func main() {
 	environment := getEnvironment()
-
 	initConfigFile(environment)
 
-	NewApiServer(viper.GetInt("port")).Start()
+	s := NewApiServer(viper.GetInt("port"))
+	s.Setup()
+
+	s.Start()
 }
