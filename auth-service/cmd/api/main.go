@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/server"
-	"log"
-
 	"github.com/gin-gonic/gin"
+	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/server"
+	"github.com/spf13/viper"
+	"log"
+	"os"
 )
 
 type APIServer struct {
@@ -21,7 +22,7 @@ func NewApiServer(port int) *APIServer {
 }
 
 func (s *APIServer) Start() {
-	baseGroup := s.engine.Group("auth")
+	baseGroup := s.engine.Group(viper.GetString("serviceBaseRoute"))
 	server.NewHealthHandler().RegisterRoutes(baseGroup)
 
 	v1Group := baseGroup.Group("v1")
@@ -35,6 +36,31 @@ func (s *APIServer) Start() {
 	}
 }
 
+func getEnvironment() string {
+	env := os.Getenv("environment")
+	if env == "" {
+		panic("Missing environment variable ['environment']")
+	}
+
+	return env
+}
+
+func initConfigFile(environment string) {
+	viper.SetConfigName(fmt.Sprint("configs", ".", environment))
+	viper.SetConfigType("json")
+
+	viper.AddConfigPath("configs")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	NewApiServer(8080).Start()
+	environment := getEnvironment()
+
+	initConfigFile(environment)
+
+	NewApiServer(viper.GetInt("port")).Start()
 }
