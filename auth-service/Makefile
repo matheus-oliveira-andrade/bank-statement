@@ -1,2 +1,2 @@
 run:
-	@go run ./cmd/api/main.go
+	@environment=development go run ./cmd/api/main.go
