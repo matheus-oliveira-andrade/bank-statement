@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/server"
 	"github.com/spf13/viper"
-	"log"
-	"os"
 )
 
 type APIServer struct {
@@ -28,40 +28,41 @@ func (s *APIServer) Setup() {
 	v1Group := baseGroup.Group("v1")
 	{
 		server.NewDummyHandler().RegisterRoutes(v1Group)
+		server.NewTokenHandler().RegisterRoutes(v1Group)
 	}
 }
 
 func (s *APIServer) Start() {
-	err := s.engine.Run(fmt.Sprint(":", s.port))
+	err := s.engine.Run(fmt.Sprint("localhost", ":", s.port))
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func getEnvironment() string {
-	env := os.Getenv("environment")
-	if env == "" {
-		panic("Missing environment variable ['environment']")
-	}
-
-	return env
-}
-
-func initConfigFile(environment string) {
-	viper.SetConfigName(fmt.Sprint("configs", ".", environment))
-	viper.SetConfigType("json")
-
+func initConfigFile() {
 	viper.AddConfigPath("configs")
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
 
 	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	environment := viper.GetString("environment")
+
+	viper.SetConfigName(fmt.Sprint("configs", ".", environment))
+	viper.SetConfigType("json")
+	viper.AddConfigPath("configs")
+
+	err = viper.MergeInConfig()
 	if err != nil {
 		panic(err)
 	}
 }
 
 func main() {
-	environment := getEnvironment()
-	initConfigFile(environment)
+	initConfigFile()
 
 	s := NewApiServer(viper.GetInt("port"))
 	s.Setup()
