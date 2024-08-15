@@ -33,7 +33,7 @@ func (s *APIServer) Setup() {
 }
 
 func (s *APIServer) Start() {
-	err := s.engine.Run(fmt.Sprint("localhost", ":", s.port))
+	err := s.engine.Run(fmt.Sprint(":", s.port))
 	if err != nil {
 		log.Fatal(err)
 	}
