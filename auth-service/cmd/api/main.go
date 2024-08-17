@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 
 	"github.com/gin-gonic/gin"
+	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/logger"
+	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/middleware"
 	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/server"
 	"github.com/spf13/viper"
 )
@@ -16,7 +19,7 @@ type APIServer struct {
 
 func NewApiServer(port int) *APIServer {
 	return &APIServer{
-		engine: gin.Default(),
+		engine: gin.New(),
 		port:   port,
 	}
 }
@@ -64,8 +67,15 @@ func initConfigFile() {
 func main() {
 	initConfigFile()
 
+  logger.SetupLogger()
+
 	s := NewApiServer(viper.GetInt("port"))
+  s.engine.Use(middleware.DefaultStructuredLogger())
+  s.engine.Use(gin.Recovery())
+
 	s.Setup()
 
 	s.Start()
+
+  slog.Info("server started", "port", viper.GetInt("port"))
 }
