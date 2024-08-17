@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -16,6 +16,8 @@ func NewAuthManager() *AuthManager {
 }
 
 func (*AuthManager) CreateJWTToken(accountNumber string) (string, error) {
+  slog.Info("Creating JWT token", "accountNumber", accountNumber)
+
 	audience := viper.GetString("authSettings.audience")
 	scopes := viper.GetStringSlice("authSettings.scopes")
 	secret := viper.GetString("authSettings.secret")
@@ -36,9 +38,11 @@ func (*AuthManager) CreateJWTToken(accountNumber string) (string, error) {
 
 	tokenGenerated, err := token.SignedString([]byte(secret))
 	if err != nil {
-		log.Println("Token not generated: ", err)
+		slog.Error("Token not generated: ", "err", err.Error())
 		return "", err
 	}
+
+  slog.Info("Token created", "accountNumber", accountNumber)
 
 	return tokenGenerated, nil
 }
