@@ -30,7 +30,6 @@ func (s *APIServer) SetupRoutes() {
 
 	v1Group := baseGroup.Group("v1")
 	{
-		server.NewDummyHandler().RegisterRoutes(v1Group)
 		server.NewTokenHandler().RegisterRoutes(v1Group)
 	}
 }
