@@ -24,7 +24,7 @@ func NewApiServer(port int) *APIServer {
 	}
 }
 
-func (s *APIServer) Setup() {
+func (s *APIServer) SetupRoutes() {
 	baseGroup := s.engine.Group(viper.GetString("serviceBaseRoute"))
 	server.NewHealthHandler().RegisterRoutes(baseGroup)
 
@@ -33,6 +33,11 @@ func (s *APIServer) Setup() {
 		server.NewDummyHandler().RegisterRoutes(v1Group)
 		server.NewTokenHandler().RegisterRoutes(v1Group)
 	}
+}
+
+func (s *APIServer) SetupMiddlewares() {
+	s.engine.Use(middleware.DefaultStructuredLogger())
+	s.engine.Use(gin.Recovery())
 }
 
 func (s *APIServer) Start() {
@@ -62,20 +67,18 @@ func initConfigFile() {
 	if err != nil {
 		panic(err)
 	}
+
+	slog.Info("server started", "port", viper.GetInt("port"))
 }
 
 func main() {
 	initConfigFile()
 
-  logger.SetupLogger()
+	logger.SetupLogger()
 
 	s := NewApiServer(viper.GetInt("port"))
-  s.engine.Use(middleware.DefaultStructuredLogger())
-  s.engine.Use(gin.Recovery())
-
-	s.Setup()
+	s.SetupMiddlewares()
+	s.SetupRoutes()
 
 	s.Start()
-
-  slog.Info("server started", "port", viper.GetInt("port"))
 }

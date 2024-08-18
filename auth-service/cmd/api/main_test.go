@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestApiServerStart(t *testing.T) {
@@ -16,7 +17,8 @@ func TestApiServerStart(t *testing.T) {
 	viper.Set("serviceBaseRoute", "auth")
 
 	server := NewApiServer(8080)
-	server.Setup()
+	server.SetupMiddlewares()
+	server.SetupRoutes()
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/auth/health", nil)
