@@ -12,3 +12,15 @@ services:
         limits:
           cpus: '0.3'
           memory: 50M
+  account-service:
+    container_name: account-service
+    build: 
+      context: ./account-service
+    ports:
+      - 8081:8080
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 50M
