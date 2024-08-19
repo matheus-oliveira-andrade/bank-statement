@@ -2,49 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"log/slog"
 
-	"github.com/gin-gonic/gin"
 	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/logger"
-	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/middleware"
-	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/server"
+	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/server"
 	"github.com/spf13/viper"
 )
-
-type APIServer struct {
-	port   int
-	engine *gin.Engine
-}
-
-func NewApiServer(port int) *APIServer {
-	return &APIServer{
-		engine: gin.New(),
-		port:   port,
-	}
-}
-
-func (s *APIServer) SetupRoutes() {
-	baseGroup := s.engine.Group(viper.GetString("serviceBaseRoute"))
-	server.NewHealthHandler().RegisterRoutes(baseGroup)
-
-	v1Group := baseGroup.Group("v1")
-	{
-		server.NewTokenHandler().RegisterRoutes(v1Group)
-	}
-}
-
-func (s *APIServer) SetupMiddlewares() {
-	s.engine.Use(middleware.DefaultStructuredLogger())
-	s.engine.Use(gin.Recovery())
-}
-
-func (s *APIServer) Start() {
-	err := s.engine.Run(fmt.Sprint(":", s.port))
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func initConfigFile() {
 	viper.AddConfigPath("configs")
@@ -66,8 +28,6 @@ func initConfigFile() {
 	if err != nil {
 		panic(err)
 	}
-
-	slog.Info("server started", "port", viper.GetInt("port"))
 }
 
 func main() {
@@ -75,7 +35,7 @@ func main() {
 
 	logger.SetupLogger()
 
-	s := NewApiServer(viper.GetInt("port"))
+	s := server.NewApiServer(viper.GetInt("port"))
 	s.SetupMiddlewares()
 	s.SetupRoutes()
 
