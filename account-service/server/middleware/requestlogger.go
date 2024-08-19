@@ -8,11 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func DefaultStructuredLogger() gin.HandlerFunc {
-	return StructuredLogger()
+func NewRequestLoggerMiddleware() gin.HandlerFunc {
+	return RequestLoggerHandle()
 }
 
-func StructuredLogger() gin.HandlerFunc {
+func RequestLoggerHandle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -34,7 +34,7 @@ func StructuredLogger() gin.HandlerFunc {
 
 		slog.Info(fmt.Sprintf("called %v %v", method, path),
 			"method", method,
-			"responseStatusCode", statusCode,
+			"statusCode", statusCode,
 			"path", path,
 			"latency", latency.String())
 	}

@@ -30,7 +30,7 @@ func (s *APIServer) SetupRoutes() {
 }
 
 func (s *APIServer) SetupMiddlewares() {
-	s.Engine.Use(middleware.DefaultStructuredLogger())
+	s.Engine.Use(middleware.NewRequestLoggerMiddleware())
 	s.Engine.Use(gin.Recovery())
 }
 
