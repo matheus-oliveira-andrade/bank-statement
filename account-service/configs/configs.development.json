@@ -2,12 +2,6 @@
   "port": 8080,
   "serviceBaseRoute": "account",
   "authSettings": {
-      "expirationHours" : 1,
-      "secret": "4REWQ1-123AAA",
-      "audience": "webAPIs",
-      "scopes": [
-        "account",
-        "bankstatement"
-      ]
+      "secret": "4REWQ1-123AAA"
   }
 }
