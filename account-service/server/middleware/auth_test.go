@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -82,6 +83,13 @@ func TestAuthHandler(t *testing.T) {
 			tokenSecret:            "123456",
 			expectedHttpStatusCode: http.StatusOK,
 		},
+		{
+			name:                   "when have token in header with prefix Bearer should identify and handle request",
+			requiredScope:          "ABC",
+			token:                  fmt.Sprintf("Bearer %v", generateTestJWTToken("123456", 1, "ABC")),
+			tokenSecret:            "123456",
+			expectedHttpStatusCode: http.StatusOK,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -93,7 +101,7 @@ func TestAuthHandler(t *testing.T) {
 			viper.Set("authSettings.secret", testCase.tokenSecret)
 
 			router := gin.New()
-			router.Use(NewCheckJWTTokenMiddleware(testCase.requiredScope))
+			router.Use(NewAuthMiddleware(testCase.requiredScope))
 			router.GET("/test", func(c *gin.Context) {
 				c.String(http.StatusOK, "Hello, World!")
 			})

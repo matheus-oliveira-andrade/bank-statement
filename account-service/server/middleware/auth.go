@@ -3,6 +3,7 @@ package middleware
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -15,7 +16,8 @@ func NewAuthMiddleware(requiredScope string) gin.HandlerFunc {
 
 func checkAuthHandle(requiredScope string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.Request.Header.Get("Authorization")
+		token := getAuthToken(c)
+
 		if token == "" {
 			slog.Info("not found token in header")
 			c.AbortWithStatus(http.StatusForbidden)
@@ -53,6 +55,20 @@ func checkAuthHandle(requiredScope string) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func getAuthToken(c *gin.Context) string {
+	authHeader := c.Request.Header.Get("Authorization")
+	parts := strings.Split(authHeader, " ")
+
+	token := ""
+	if len(parts) > 1 {
+		token = parts[1]
+	} else {
+		token = parts[0]
+	}
+
+	return token
 }
 
 func hasRequiredScope(claims jwt.MapClaims, requiredScope string) bool {
