@@ -3,5 +3,12 @@
   "serviceBaseRoute": "account",
   "authSettings": {
       "secret": "4REWQ1-123AAA"
+  },
+  "db": {
+    "host": "localhost",
+    "port": "5432",
+    "user": "db_user",
+    "password": "123Abc!@#",
+    "name": "accountDB"
   }
 }

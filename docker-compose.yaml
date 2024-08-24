@@ -24,3 +24,19 @@ services:
         limits:
           cpus: '0.3'
           memory: 50M
+  db:
+    container_name: db
+    build: 
+      context: ./db
+    restart: always
+    ports:
+      - 5432:5432
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 200M
+    environment:
+      POSTGRES_USER: "db_user"
+      POSTGRES_PASSWORD: "123Abc!@#"
+      POSTGRES_DB: "accountDB"
