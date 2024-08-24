@@ -2,6 +2,13 @@
   "port": 8080,
   "serviceBaseRoute": "account",
   "authSettings": {
-      "secret": "4REWQ1-123AAA"
+    "secret": "4REWQ1-123AAA"
+  },
+  "db": {
+    "host": "db",
+    "port": "5432",
+    "user": "db_user",
+    "password": "123Abc!@#",
+    "name": "accountDB"
   }
 }
