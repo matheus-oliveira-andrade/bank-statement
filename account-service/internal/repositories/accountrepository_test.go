@@ -74,3 +74,74 @@ func TestGetAccountByNumber_DBError(t *testing.T) {
 	assert.Error(t, err, "an error was expected due to a database connection issue")
 	assert.Nil(t, account, "account should be nil when there is a database error")
 }
+
+func TestUpdateAccountBalance_ErrOnExecute(t *testing.T) {
+	// Arrange
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	repo := NewAccountRepository(db)
+
+	acc := domain.NewAccount("1", "12345678901", "John Dii")
+	acc.Id = "13"
+	acc.Deposit(1000)
+
+	mock.ExpectExec("UPDATE accounts SET Balance = \\$1, UpdatedAt = \\$2 WHERE Id = \\$3").
+		WithArgs(acc.Balance, acc.UpdatedAt, acc.Id).
+		WillReturnError(sql.ErrConnDone)
+
+	// Act
+	err = repo.UpdateAccountBalance(acc)
+
+	// Assert
+	assert.NotNil(t, err)
+	assert.Equal(t, sql.ErrConnDone, err)
+}
+
+func TestUpdateAccountBalance_NotRowsAffected(t *testing.T) {
+	// Arrange
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	repo := NewAccountRepository(db)
+
+	acc := domain.NewAccount("1", "12345678901", "John Dii")
+	acc.Id = "13"
+	acc.Deposit(1000)
+
+	mock.ExpectExec("UPDATE accounts SET Balance = \\$1, UpdatedAt = \\$2 WHERE Id = \\$3").
+		WithArgs(acc.Balance, acc.UpdatedAt, acc.Id).
+		WillReturnResult(sqlmock.NewResult(1, 0))
+
+	// Act
+	err = repo.UpdateAccountBalance(acc)
+
+	// Assert
+	assert.NotNil(t, err)
+	assert.Equal(t, sql.ErrNoRows, err)
+}
+
+func TestUpdateAccountBalance_Success(t *testing.T) {
+	// Arrange
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	repo := NewAccountRepository(db)
+
+	acc := domain.NewAccount("1", "12345678901", "John Dii")
+	acc.Id = "13"
+	acc.Deposit(1000)
+
+	mock.ExpectExec("UPDATE accounts SET Balance = \\$1, UpdatedAt = \\$2 WHERE Id = \\$3").
+		WithArgs(acc.Balance, acc.UpdatedAt, acc.Id).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// Act
+	err = repo.UpdateAccountBalance(acc)
+
+	// Assert
+	assert.Nil(t, err)
+}

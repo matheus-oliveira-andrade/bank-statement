@@ -28,3 +28,8 @@ func (m *MockAccountRepository) CreateAccount(account *domain.Account) (string, 
 	args := m.Called(account)
 	return args.String(0), args.Error(1)
 }
+
+func (m *MockAccountRepository) UpdateAccountBalance(account *domain.Account) error {
+	args := m.Called(account)
+	return args.Error(0)
+}

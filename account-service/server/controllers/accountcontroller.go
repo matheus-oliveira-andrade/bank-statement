@@ -12,20 +12,23 @@ import (
 )
 
 type AccountController struct {
-	createAccountUseCase usecases.CreateAccountUseCaseInterface
-	getAccountUseCase    usecases.GetAccountUseCaseInterface
+	createAccountUseCase  usecases.CreateAccountUseCaseInterface
+	getAccountUseCase     usecases.GetAccountUseCaseInterface
+	depositAccountUseCase usecases.DepositAccountUseCaseInterface
 }
 
-func NewAccountController(createAccountUseCase usecases.CreateAccountUseCaseInterface, getAccountUseCase usecases.GetAccountUseCaseInterface) *AccountController {
+func NewAccountController(createAccountUseCase usecases.CreateAccountUseCaseInterface, getAccountUseCase usecases.GetAccountUseCaseInterface, depositAccountUseCase usecases.DepositAccountUseCaseInterface) *AccountController {
 	return &AccountController{
-		createAccountUseCase: createAccountUseCase,
-		getAccountUseCase:    getAccountUseCase,
+		createAccountUseCase:  createAccountUseCase,
+		getAccountUseCase:     getAccountUseCase,
+		depositAccountUseCase: depositAccountUseCase,
 	}
 }
 
 func (a *AccountController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/account", middleware.NewAuthMiddleware("account"), a.createAccountHandler)
 	router.GET("/account/:number", middleware.NewAuthMiddleware("account"), a.getAccountHandler)
+	router.POST("/account/:number/deposit", middleware.NewAuthMiddleware("account"), a.depositAccountHandler)
 }
 
 func (c *AccountController) createAccountHandler(ctx *gin.Context) {
@@ -76,4 +79,28 @@ func (c *AccountController) getAccountHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, models.NewGetAccountResponse(acc))
+}
+
+func (c *AccountController) depositAccountHandler(ctx *gin.Context) {
+	var req models.DepositAccountRequest
+	req.Number = ctx.Param("number")
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		slog.Error(err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"errorMessage": err.Error(),
+		})
+		return
+	}
+
+	err := c.depositAccountUseCase.Handle(req.Number, req.Value)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"errorMessage": err.Error(),
+		})
+
+		return
+	}
+
+	ctx.Writer.WriteHeader(http.StatusNoContent)
 }
