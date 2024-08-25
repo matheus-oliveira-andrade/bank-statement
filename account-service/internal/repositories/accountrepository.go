@@ -11,6 +11,7 @@ type AccountRepositoryInterface interface {
 	GetAccountByDocument(document string) (*domain.Account, error)
 	GetNextAccountNumber() (string, error)
 	CreateAccount(account *domain.Account) (string, error)
+	UpdateAccountBalance(account *domain.Account) error
 }
 
 type AccountRepository struct {
@@ -86,4 +87,24 @@ func (r *AccountRepository) CreateAccount(account *domain.Account) (string, erro
 	err := row.Scan(&id)
 
 	return id, err
+}
+
+func (r *AccountRepository) UpdateAccountBalance(account *domain.Account) error {
+	result, err := r.db.Exec(`UPDATE accounts SET Balance = $1, UpdatedAt = $2 WHERE Id = $3`,
+		account.Balance, account.UpdatedAt, account.Id)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }

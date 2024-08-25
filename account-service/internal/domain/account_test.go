@@ -49,3 +49,29 @@ func TestAccountValidate(t *testing.T) {
 		})
 	}
 }
+
+func TestDeposit_NegativeValue(t *testing.T) {
+	// arrange
+	acc := NewAccount("1", "01234567890", "John")
+	acc.Balance = 0
+
+	// act
+	err := acc.Deposit(-1)
+
+	// assert
+	assert.Equal(t, err, errors.New("for a deposit the value must be greater than zero"))
+	assert.Equal(t, int64(0), acc.Balance)
+}
+
+func TestDeposit_ValidValue(t *testing.T) {
+	// arrange
+	acc := NewAccount("1", "01234567890", "John")
+	acc.Balance = 50
+
+	// act
+	err := acc.Deposit(100)
+
+	// assert
+	assert.Nil(t, err)
+	assert.Equal(t, int64(150), acc.Balance)
+}
