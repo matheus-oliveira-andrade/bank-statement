@@ -32,8 +32,13 @@ func (s *APIServer) SetupRoutes() {
 
 	var db = repositories.NewDBConnection()
 	accountRepository := repositories.NewAccountRepository(db)
+
 	createAccountUseCase := usecases.NewCreateAccountUseCase(accountRepository)
-	controllers.NewAccountController(createAccountUseCase).RegisterRoutes(v1Group)
+	getAccountUseCase := usecases.NewGetAccountUseCase(accountRepository)
+
+	accountController := controllers.NewAccountController(createAccountUseCase, getAccountUseCase)
+
+	accountController.RegisterRoutes(v1Group)
 }
 
 func (s *APIServer) SetupMiddlewares() {

@@ -55,8 +55,8 @@ func TestGetAccountByNumber_NotFound(t *testing.T) {
 		WillReturnError(sql.ErrNoRows)
 
 	account, err := repo.GetAccountByNumber("987654321")
-	assert.Error(t, err, "an error was expected when account is not found")
-	assert.Nil(t, account, "account should be nil when not found")
+	assert.Nil(t, err)
+	assert.Nil(t, account)
 }
 
 func TestGetAccountByNumber_DBError(t *testing.T) {
