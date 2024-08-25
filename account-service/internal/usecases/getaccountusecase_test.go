@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/domain"
+	usecases_mock "github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/usecases/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +17,7 @@ func TestGetAccountUseCase_Handle_Success(t *testing.T) {
 		"John Dee",
 	)
 
-	mockAccountRepo := new(MockAccountRepository)
+	mockAccountRepo := new(usecases_mock.MockAccountRepository)
 	mockAccountRepo.On("GetAccountByNumber", acc.Number).Return(acc, nil)
 
 	useCase := NewGetAccountUseCase(mockAccountRepo)
@@ -41,7 +42,7 @@ func TestGetAccountUseCase_Handle_NotFound(t *testing.T) {
 		"John Dee",
 	)
 
-	mockAccountRepo := new(MockAccountRepository)
+	mockAccountRepo := new(usecases_mock.MockAccountRepository)
 	mockAccountRepo.On("GetAccountByNumber", acc.Number).Return((*domain.Account)(nil), nil)
 
 	useCase := NewGetAccountUseCase(mockAccountRepo)
@@ -64,7 +65,7 @@ func TestGetAccountUseCase_Handle_Error(t *testing.T) {
 
 	expectedError := errors.New("error getting account")
 
-	mockAccountRepo := new(MockAccountRepository)
+	mockAccountRepo := new(usecases_mock.MockAccountRepository)
 	mockAccountRepo.On("GetAccountByNumber", acc.Number).Return((*domain.Account)(nil), expectedError)
 
 	useCase := NewGetAccountUseCase(mockAccountRepo)

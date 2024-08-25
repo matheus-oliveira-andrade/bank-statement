@@ -5,37 +5,14 @@ import (
 	"testing"
 
 	"github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/domain"
+	usecases_mock "github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/usecases/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-type MockAccountRepository struct {
-	mock.Mock
-}
-
-func (m *MockAccountRepository) GetAccountByNumber(number string) (*domain.Account, error) {
-	args := m.Called(number)
-	return args.Get(0).(*domain.Account), args.Error(1)
-}
-
-func (m *MockAccountRepository) GetAccountByDocument(document string) (*domain.Account, error) {
-	args := m.Called(document)
-	return args.Get(0).(*domain.Account), args.Error(1)
-}
-
-func (m *MockAccountRepository) GetNextAccountNumber() (string, error) {
-	args := m.Called()
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockAccountRepository) CreateAccount(account *domain.Account) (string, error) {
-	args := m.Called(account)
-	return args.String(0), args.Error(1)
-}
-
 func TestCreateAccountUseCase_Handle_Success(t *testing.T) {
 	// act
-	mockRepo := new(MockAccountRepository)
+	mockRepo := new(usecases_mock.MockAccountRepository)
 	useCase := NewCreateAccountUseCase(mockRepo)
 
 	document := "12345678901"
@@ -55,7 +32,7 @@ func TestCreateAccountUseCase_Handle_Success(t *testing.T) {
 
 func TestCreateAccountUseCase_Handle_DocumentInUse(t *testing.T) {
 	// arange
-	mockRepo := new(MockAccountRepository)
+	mockRepo := new(usecases_mock.MockAccountRepository)
 	useCase := NewCreateAccountUseCase(mockRepo)
 
 	existingAccount := &domain.Account{
@@ -79,7 +56,7 @@ func TestCreateAccountUseCase_Handle_DocumentInUse(t *testing.T) {
 
 func TestCreateAccountUseCase_Handle_GetNextAccountNumberError(t *testing.T) {
 	// arrange
-	mockRepo := new(MockAccountRepository)
+	mockRepo := new(usecases_mock.MockAccountRepository)
 	useCase := NewCreateAccountUseCase(mockRepo)
 
 	mockRepo.On("GetAccountByDocument", "12345678901").Return((*domain.Account)(nil), nil)
@@ -97,7 +74,7 @@ func TestCreateAccountUseCase_Handle_GetNextAccountNumberError(t *testing.T) {
 
 func TestCreateAccountUseCase_Handle_CreateAccountError(t *testing.T) {
 	// arrange
-	mockRepo := new(MockAccountRepository)
+	mockRepo := new(usecases_mock.MockAccountRepository)
 	useCase := NewCreateAccountUseCase(mockRepo)
 
 	mockRepo.On("GetAccountByDocument", "12345678901").Return((*domain.Account)(nil), nil)
