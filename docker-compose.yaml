@@ -40,3 +40,18 @@ services:
       POSTGRES_USER: "db_user"
       POSTGRES_PASSWORD: "123Abc!@#"
       POSTGRES_DB: "accountDB"
+  message-broker:
+    container_name: message-broker
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 200M
+    environment:
+      RABBITMQ_DEFAULT_USER: broker_user
+      RABBITMQ_DEFAULT_PASS: Abc6666
