@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/infrastructure/broker"
 	"github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/repositories"
 	"github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/usecases"
 	"github.com/matheus-oliveira-andrade/bank-statement/account-service/server/controllers"
@@ -33,7 +34,9 @@ func (s *APIServer) SetupRoutes() {
 	var db = repositories.NewDBConnection()
 	accountRepository := repositories.NewAccountRepository(db)
 
-	createAccountUseCase := usecases.NewCreateAccountUseCase(accountRepository)
+	var broker = broker.NewBroker(broker.BuildConnectionUrl())
+
+	createAccountUseCase := usecases.NewCreateAccountUseCase(accountRepository, broker)
 	getAccountUseCase := usecases.NewGetAccountUseCase(accountRepository)
 	depositUseCase := usecases.NewDepositAccountUseCase(accountRepository)
 

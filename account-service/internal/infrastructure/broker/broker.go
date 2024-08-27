@@ -6,13 +6,14 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/matheus-oliveira-andrade/bank-statement/pkg/shared/events"
+	"github.com/matheus-oliveira-andrade/bank-statement/account-service/shared/events"
+	"github.com/spf13/viper"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type BrokerInterface interface {
-	Produce(eventPublish events.EventPublish, configs *ProduceConfigs) error
+	Produce(eventPublish *events.EventPublish, configs *ProduceConfigs) error
 }
 
 type RabbitMQBroker struct {
@@ -25,7 +26,7 @@ func NewBroker(url string) BrokerInterface {
 	}
 }
 
-func (b *RabbitMQBroker) Produce(eventPublish events.EventPublish, configs *ProduceConfigs) error {
+func (b *RabbitMQBroker) Produce(eventPublish *events.EventPublish, configs *ProduceConfigs) error {
 	conn, err := amqp.Dial(b.url)
 	if err != nil {
 		slog.Error("Failed to connect to RabbitMQ", "error", err)
@@ -74,4 +75,14 @@ func (b *RabbitMQBroker) Produce(eventPublish events.EventPublish, configs *Prod
 
 type ProduceConfigs struct {
 	Topic string
+}
+
+func BuildConnectionUrl() string {
+	user := viper.GetString("broker.user")
+	password := viper.GetString("broker.password")
+	host := viper.GetString("broker.host")
+	port := viper.GetString("broker.port")
+	protocol := viper.GetString("broker.protocol")
+
+	return protocol + "://" + user + ":" + password + "@" + host + ":" + port + "/"
 }

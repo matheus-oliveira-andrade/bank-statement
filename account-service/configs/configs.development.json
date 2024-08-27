@@ -2,7 +2,7 @@
   "port": 8080,
   "serviceBaseRoute": "account",
   "authSettings": {
-      "secret": "4REWQ1-123AAA"
+    "secret": "4REWQ1-123AAA"
   },
   "db": {
     "host": "localhost",
@@ -10,5 +10,12 @@
     "user": "db_user",
     "password": "123Abc!@#",
     "name": "accountDB"
+  },
+  "broker": {
+    "user": "broker_user",
+    "password": "Abc6666",
+    "host": "localhost",
+    "port": "5672",
+    "protocol": "amqp"
   }
 }

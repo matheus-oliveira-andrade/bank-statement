@@ -5,7 +5,9 @@ import (
 	"log/slog"
 
 	"github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/domain"
+	"github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/infrastructure/broker"
 	"github.com/matheus-oliveira-andrade/bank-statement/account-service/internal/repositories"
+	"github.com/matheus-oliveira-andrade/bank-statement/account-service/shared/events"
 )
 
 type CreateAccountUseCaseInterface interface {
@@ -14,11 +16,13 @@ type CreateAccountUseCaseInterface interface {
 
 type CreateAccountUseCase struct {
 	accountRepository repositories.AccountRepositoryInterface
+	broker            broker.BrokerInterface
 }
 
-func NewCreateAccountUseCase(accountRepository repositories.AccountRepositoryInterface) *CreateAccountUseCase {
+func NewCreateAccountUseCase(accountRepository repositories.AccountRepositoryInterface, broker broker.BrokerInterface) *CreateAccountUseCase {
 	return &CreateAccountUseCase{
 		accountRepository: accountRepository,
+		broker:            broker,
 	}
 }
 
@@ -52,6 +56,14 @@ func (us *CreateAccountUseCase) Handle(document string, name string) (string, er
 		slog.Error("error creating account", "error", err)
 		return "", err
 	}
+
+	event, err := events.NewEventPublish(events.NewAccountCreated(number, name, document))
+	if err != nil {
+		slog.Error("error creating account created event", "error", err)
+		return "", err
+	}
+
+	us.broker.Produce(event, &broker.ProduceConfigs{Topic: "account"})
 
 	slog.Info("account created", "id", id, "document", document, "name", name)
 	return id, nil

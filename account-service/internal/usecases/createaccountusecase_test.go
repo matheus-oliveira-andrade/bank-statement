@@ -13,13 +13,16 @@ import (
 func TestCreateAccountUseCase_Handle_Success(t *testing.T) {
 	// act
 	mockRepo := new(usecases_mock.MockAccountRepository)
-	useCase := NewCreateAccountUseCase(mockRepo)
+	mockBroker := new(usecases_mock.MockBroker)
+	useCase := NewCreateAccountUseCase(mockRepo, mockBroker)
 
 	document := "12345678901"
 
 	mockRepo.On("GetAccountByDocument", document).Return((*domain.Account)(nil), nil)
 	mockRepo.On("GetNextAccountNumber").Return("987654321", nil)
 	mockRepo.On("CreateAccount", mock.Anything).Return("1", nil)
+
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	id, err := useCase.Handle(document, "John Doe")
@@ -33,7 +36,8 @@ func TestCreateAccountUseCase_Handle_Success(t *testing.T) {
 func TestCreateAccountUseCase_Handle_DocumentInUse(t *testing.T) {
 	// arange
 	mockRepo := new(usecases_mock.MockAccountRepository)
-	useCase := NewCreateAccountUseCase(mockRepo)
+	mockBroker := new(usecases_mock.MockBroker)
+	useCase := NewCreateAccountUseCase(mockRepo, mockBroker)
 
 	existingAccount := &domain.Account{
 		Id:       "1",
@@ -44,6 +48,7 @@ func TestCreateAccountUseCase_Handle_DocumentInUse(t *testing.T) {
 	}
 	mockRepo.On("GetAccountByDocument", "12345678901").Return(existingAccount, nil)
 
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 	// act
 	id, err := useCase.Handle("12345678901", "John Doe")
 
@@ -57,10 +62,13 @@ func TestCreateAccountUseCase_Handle_DocumentInUse(t *testing.T) {
 func TestCreateAccountUseCase_Handle_GetNextAccountNumberError(t *testing.T) {
 	// arrange
 	mockRepo := new(usecases_mock.MockAccountRepository)
-	useCase := NewCreateAccountUseCase(mockRepo)
+	mockBroker := new(usecases_mock.MockBroker)
+	useCase := NewCreateAccountUseCase(mockRepo, mockBroker)
 
 	mockRepo.On("GetAccountByDocument", "12345678901").Return((*domain.Account)(nil), nil)
 	mockRepo.On("GetNextAccountNumber").Return("", errors.New("error getting next account number"))
+
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	id, err := useCase.Handle("12345678901", "John Doe")
@@ -75,11 +83,14 @@ func TestCreateAccountUseCase_Handle_GetNextAccountNumberError(t *testing.T) {
 func TestCreateAccountUseCase_Handle_CreateAccountError(t *testing.T) {
 	// arrange
 	mockRepo := new(usecases_mock.MockAccountRepository)
-	useCase := NewCreateAccountUseCase(mockRepo)
+	mockBroker := new(usecases_mock.MockBroker)
+	useCase := NewCreateAccountUseCase(mockRepo, mockBroker)
 
 	mockRepo.On("GetAccountByDocument", "12345678901").Return((*domain.Account)(nil), nil)
 	mockRepo.On("GetNextAccountNumber").Return("987654321", nil)
 	mockRepo.On("CreateAccount", mock.Anything).Return("", errors.New("error creating account"))
+
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	id, err := useCase.Handle("12345678901", "John Doe")
