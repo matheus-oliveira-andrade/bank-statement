@@ -44,6 +44,9 @@ services:
     container_name: message-broker
     image: rabbitmq:3-management
     restart: always
+    volumes:
+      - ./broker/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./broker/definitions.json:/etc/rabbitmq/definitions.json
     ports:
       - 5672:5672
       - 15672:15672
