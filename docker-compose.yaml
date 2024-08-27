@@ -1,4 +1,3 @@
-version: '3'
 services:
   auth-service:
     container_name: auth-service
@@ -39,7 +38,6 @@ services:
     environment:
       POSTGRES_USER: "db_user"
       POSTGRES_PASSWORD: "123Abc!@#"
-      POSTGRES_DB: "accountDB"
   message-broker:
     container_name: message-broker
     image: rabbitmq:3-management
