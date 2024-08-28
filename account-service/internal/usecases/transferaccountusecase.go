@@ -80,13 +80,11 @@ func (us *TransferAccountUseCase) Handle(fromNumber string, toNumber string, val
 func (us *TransferAccountUseCase) produceEventTransferRealized(fromNumber string, toNumber string, value int64, fromBalance int64) error {
 	transferRealizedEvent, err := events.NewEventPublish(events.NewTransferRealized(fromNumber, toNumber, value, fromBalance))
 	if err != nil {
-
 		return err
 	}
 
 	err = us.broker.Produce(transferRealizedEvent, &broker.ProduceConfigs{Topic: "account"})
 	if err != nil {
-
 		return err
 	}
 
