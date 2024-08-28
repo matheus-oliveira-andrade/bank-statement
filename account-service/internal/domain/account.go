@@ -15,6 +15,8 @@ const (
 	CNPJLength = 14
 )
 
+var ErrInsufficientFunds = errors.New("insufficient funds")
+
 type Account struct {
 	Id        string
 	Number    string
@@ -51,12 +53,41 @@ func (acc *Account) Validate() error {
 }
 
 func (acc *Account) Deposit(value int64) error {
-	if value < 0 {
+	if value <= 0 {
 		return errors.New("for a deposit the value must be greater than zero")
 	}
 
 	acc.Balance += value
 	acc.UpdatedAt = time.Now()
+
+	return nil
+}
+
+func (acc *Account) withdraw(value int64) error {
+	if value <= 0 {
+		return errors.New("for a withdraw the value must be greater than zero")
+	}
+
+	if value > acc.Balance {
+		return ErrInsufficientFunds
+	}
+
+	acc.Balance -= value
+	acc.UpdatedAt = time.Now()
+
+	return nil
+}
+
+func (from *Account) Transfer(value int64, to *Account) error {
+	err := from.withdraw(value)
+	if err != nil {
+		return err
+	}
+
+	err = to.Deposit(value)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

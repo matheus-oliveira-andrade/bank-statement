@@ -75,3 +75,94 @@ func TestDeposit_ValidValue(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int64(150), acc.Balance)
 }
+
+func TestWithdraw_NegativeValue(t *testing.T) {
+	// arrange
+	initialBalance := int64(50)
+
+	acc := NewAccount("1", "01234567890", "John")
+	acc.Balance = initialBalance
+
+	// act
+	err := acc.withdraw(-10)
+
+	// assert
+	assert.NotNil(t, err)
+	assert.Equal(t, initialBalance, acc.Balance)
+}
+
+func TestWithdraw_InsufficientFunds(t *testing.T) {
+	// arrange
+	initialBalance := int64(50)
+
+	acc := NewAccount("1", "01234567890", "John")
+	acc.Balance = initialBalance
+
+	// act
+	err := acc.withdraw(100)
+
+	// assert
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrInsufficientFunds, err)
+	assert.Equal(t, initialBalance, acc.Balance)
+}
+
+func TestWithdraw_Success(t *testing.T) {
+	// arrange
+	initialBalance := int64(50)
+
+	acc := NewAccount("1", "01234567890", "John")
+	acc.Balance = initialBalance
+
+	// act
+	err := acc.withdraw(10)
+
+	// assert
+	assert.Nil(t, err)
+	assert.Equal(t, initialBalance-10, acc.Balance)
+}
+
+func TestTransfer_ErrorWithdrawValueFromAccount(t *testing.T) {
+	// arrange
+	from := NewAccount("1", "01234567890", "John")
+	from.Balance = 0
+
+	to := NewAccount("2", "12345678901", "Jenny")
+
+	// act
+	err := from.Transfer(25, to)
+
+	// assert
+	assert.NotNil(t, ErrInsufficientFunds, err)
+}
+
+func TestTransfer_ErrorValueZero(t *testing.T) {
+	// arrange
+	from := NewAccount("1", "01234567890", "John")
+	from.Balance = 0
+
+	to := NewAccount("2", "12345678901", "Jenny")
+
+	// act
+	err := from.Transfer(0, to)
+
+	// assert
+	assert.NotNil(t, err)
+}
+
+func TestTransfer_Success(t *testing.T) {
+	// arrange
+	from := NewAccount("1", "01234567890", "John")
+	from.Balance = 25
+
+	to := NewAccount("2", "12345678901", "Jenny")
+	to.Balance = 0
+
+	// act
+	err := from.Transfer(25, to)
+
+	// assert
+	assert.Nil(t, err)
+	assert.Equal(t, int64(0), from.Balance)
+	assert.Equal(t, int64(25), to.Balance)
+}
