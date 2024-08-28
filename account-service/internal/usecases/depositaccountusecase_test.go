@@ -13,11 +13,14 @@ import (
 func TestDepositAccountUseCase_Handle_ErrorGettingAccount(t *testing.T) {
 	// act
 	mockRepo := new(usecases_mock.MockAccountRepository)
-	useCase := NewDepositAccountUseCase(mockRepo)
+	mockBroker := new(usecases_mock.MockBroker)
+
+	useCase := NewDepositAccountUseCase(mockRepo, mockBroker)
 
 	acc := domain.NewAccount("4", "01234567890", "John Doo")
 
 	mockRepo.On("GetAccountByNumber", acc.Number).Return(acc, errors.New("generic error"))
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	err := useCase.Handle(acc.Number, 150)
@@ -31,11 +34,14 @@ func TestDepositAccountUseCase_Handle_ErrorGettingAccount(t *testing.T) {
 func TestDepositAccountUseCase_Handle_AccountNotFound(t *testing.T) {
 	// act
 	mockRepo := new(usecases_mock.MockAccountRepository)
-	useCase := NewDepositAccountUseCase(mockRepo)
+	mockBroker := new(usecases_mock.MockBroker)
+
+	useCase := NewDepositAccountUseCase(mockRepo, mockBroker)
 
 	acc := domain.NewAccount("4", "01234567890", "John Doo")
 
 	mockRepo.On("GetAccountByNumber", acc.Number).Return((*domain.Account)(nil), nil)
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	err := useCase.Handle(acc.Number, 150)
@@ -50,12 +56,15 @@ func TestDepositAccountUseCase_Handle_AccountNotFound(t *testing.T) {
 func TestDepositAccountUseCase_Handle_Success(t *testing.T) {
 	// act
 	mockRepo := new(usecases_mock.MockAccountRepository)
-	useCase := NewDepositAccountUseCase(mockRepo)
+	mockBroker := new(usecases_mock.MockBroker)
+
+	useCase := NewDepositAccountUseCase(mockRepo, mockBroker)
 
 	acc := domain.NewAccount("4", "01234567890", "John Doo")
 
 	mockRepo.On("GetAccountByNumber", acc.Number).Return(acc, nil)
 	mockRepo.On("UpdateAccountBalance", mock.Anything).Return(nil)
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	err := useCase.Handle(acc.Number, 150)
