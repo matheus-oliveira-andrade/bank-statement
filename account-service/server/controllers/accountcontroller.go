@@ -12,16 +12,21 @@ import (
 )
 
 type AccountController struct {
-	createAccountUseCase  usecases.CreateAccountUseCaseInterface
-	getAccountUseCase     usecases.GetAccountUseCaseInterface
-	depositAccountUseCase usecases.DepositAccountUseCaseInterface
+	createAccountUseCase   usecases.CreateAccountUseCaseInterface
+	getAccountUseCase      usecases.GetAccountUseCaseInterface
+	depositAccountUseCase  usecases.DepositAccountUseCaseInterface
+	transferAccountUseCase usecases.TransferAccountUseCaseInterface
 }
 
-func NewAccountController(createAccountUseCase usecases.CreateAccountUseCaseInterface, getAccountUseCase usecases.GetAccountUseCaseInterface, depositAccountUseCase usecases.DepositAccountUseCaseInterface) *AccountController {
+func NewAccountController(createAccountUseCase usecases.CreateAccountUseCaseInterface,
+	getAccountUseCase usecases.GetAccountUseCaseInterface,
+	depositAccountUseCase usecases.DepositAccountUseCaseInterface,
+	transferAccountUseCase usecases.TransferAccountUseCaseInterface) *AccountController {
 	return &AccountController{
-		createAccountUseCase:  createAccountUseCase,
-		getAccountUseCase:     getAccountUseCase,
-		depositAccountUseCase: depositAccountUseCase,
+		createAccountUseCase:   createAccountUseCase,
+		getAccountUseCase:      getAccountUseCase,
+		depositAccountUseCase:  depositAccountUseCase,
+		transferAccountUseCase: transferAccountUseCase,
 	}
 }
 
@@ -29,6 +34,7 @@ func (a *AccountController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/account", middleware.NewAuthMiddleware("account"), a.createAccountHandler)
 	router.GET("/account/:number", middleware.NewAuthMiddleware("account"), a.getAccountHandler)
 	router.POST("/account/:number/deposit", middleware.NewAuthMiddleware("account"), a.depositAccountHandler)
+	router.POST("/account/:number/transfer", middleware.NewAuthMiddleware("account"), a.transferAccountHandler)
 }
 
 func (c *AccountController) createAccountHandler(ctx *gin.Context) {
@@ -94,6 +100,30 @@ func (c *AccountController) depositAccountHandler(ctx *gin.Context) {
 	}
 
 	err := c.depositAccountUseCase.Handle(req.Number, req.Value)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"errorMessage": err.Error(),
+		})
+
+		return
+	}
+
+	ctx.Writer.WriteHeader(http.StatusNoContent)
+}
+
+func (c *AccountController) transferAccountHandler(ctx *gin.Context) {
+	var req models.TransferAccountRequest
+	req.FromNumber = ctx.Param("number")
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		slog.Error(err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"errorMessage": err.Error(),
+		})
+		return
+	}
+
+	err := c.transferAccountUseCase.Handle(req.FromNumber, req.ToNumber, req.Value)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errorMessage": err.Error(),
