@@ -43,7 +43,7 @@ func TestApiServerStart(t *testing.T) {
 	server.SetupRoutes()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest(http.MethodGet, "/account/health", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/statement/health", nil)
 	server.Engine.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
