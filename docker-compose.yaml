@@ -23,6 +23,18 @@ services:
         limits:
           cpus: '0.3'
           memory: 50M
+  statement-service:
+    container_name: statement-service
+    build: 
+      context: ./statement-service
+    ports:
+      - 8082:8080
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 50M
   db:
     container_name: db
     build: 
