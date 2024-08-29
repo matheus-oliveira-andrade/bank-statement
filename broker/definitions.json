@@ -1,8 +1,8 @@
 {
-    "rabbit_version": "3.13.6",
-    "rabbitmq_version": "3.13.6",
+    "rabbit_version": "3.13.7",
+    "rabbitmq_version": "3.13.7",
     "product_name": "RabbitMQ",
-    "product_version": "3.13.6",
+    "product_version": "3.13.7",
     "users": [
         {
             "name": "broker_user",
@@ -43,7 +43,15 @@
         }
     ],
     "policies": [],
-    "queues": [],
+    "queues": [
+        {
+            "name": "statement-service-queue",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        }
+    ],
     "exchanges": [
         {
             "name": "account",
@@ -55,5 +63,14 @@
             "arguments": {}
         }
     ],
-    "bindings": []
+    "bindings": [
+        {
+            "source": "account",
+            "vhost": "/",
+            "destination": "statement-service-queue",
+            "destination_type": "queue",
+            "routing_key": "",
+            "arguments": {}
+        }
+    ]
 }
