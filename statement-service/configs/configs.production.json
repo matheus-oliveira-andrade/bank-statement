@@ -9,7 +9,7 @@
     "port": "5432",
     "user": "db_user",
     "password": "123Abc!@#",
-    "name": "accountdb"
+    "name": "statementdb"
   },
   "broker": {
     "user": "broker_user",
