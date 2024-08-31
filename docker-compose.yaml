@@ -27,8 +27,20 @@ services:
     container_name: statement-service
     build: 
       context: ./statement-service
+      dockerfile: Api.Dockerfile
     ports:
       - 8082:8080
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 50M
+  async-receiver-statement-service:
+    container_name: async-receiver-statement-service
+    build: 
+      context: ./statement-service
+      dockerfile: AsyncReceiver.Dockerfile
     restart: always
     deploy:
       resources:
