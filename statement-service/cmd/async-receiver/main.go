@@ -8,8 +8,10 @@ import (
 	"log/slog"
 
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/configs"
+	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/eventhandlers"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/infrastructure/broker"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/logger"
+	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/repositories"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/shared/events"
 )
 
@@ -23,6 +25,11 @@ func main() {
 	}
 
 	defer brokerConn.Close()
+
+	dbConnection := repositories.NewDBConnection()
+	if dbConnection == nil {
+		panic("error connecting to database")
+	}
 
 	ch, err := brokerConn.Channel()
 	if err != nil {
@@ -64,13 +71,17 @@ func main() {
 					slog.Error("error decoding event", "error", err)
 				}
 
-				slog.Info("event", "e", obj)
+				repository := repositories.NewAccountRepository(dbConnection)
+				handler := eventhandlers.NewAccountCreatedHandler(repository)
+
+				handler.Handler(obj)
+
 			default:
 				slog.Info("event type not mapped", "eventType", EventPublish.Type)
 			}
 		}
 	}()
 
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	log.Printf(" [*] Waiting for events. To exit press CTRL+C")
 	<-forever
 }
