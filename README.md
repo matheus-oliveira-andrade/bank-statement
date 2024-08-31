@@ -9,3 +9,14 @@ A banking system project that allows for account creation, money transactions th
 - Postgres: Relational database for data storage.
 - Testing: To ensure the validity of the code.
 - Event-Driven Architecture: Communication between different contexts through events, ensuring data consistency.
+
+### How to run
+```bash
+# run all services using docker 
+make up
+```
+
+```bash
+# stop and remove all services
+make down
+```
