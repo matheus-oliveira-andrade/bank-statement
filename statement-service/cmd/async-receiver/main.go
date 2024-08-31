@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -38,7 +39,7 @@ func main() {
 
 	defer ch.Close()
 
-	msgs, err := ch.Consume(
+	consumedMessages, err := ch.Consume(
 		"statement-service-queue",
 		"",
 		true,
@@ -55,33 +56,40 @@ func main() {
 	var forever chan struct{}
 
 	go func() {
-		for d := range msgs {
+		for consumedMessage := range consumedMessages {
 			var EventPublish events.EventPublish
-			err := json.NewDecoder(bytes.NewReader(d.Body)).Decode(&EventPublish)
+			err := decodeEvent(consumedMessage.Body, &EventPublish)
 			if err != nil {
 				fmt.Println(err)
 			}
 
 			switch EventPublish.Type {
-			case "AccountCreated":
-				var obj events.AccountCreated
-
-				err := json.NewDecoder(bytes.NewReader([]byte(EventPublish.Data))).Decode(&obj)
-				if err != nil {
-					slog.Error("error decoding event", "error", err)
-				}
-
-				repository := repositories.NewAccountRepository(dbConnection)
-				handler := eventhandlers.NewAccountCreatedHandler(repository)
-
-				handler.Handler(obj)
-
+			case events.AccountCreatedEventKey:
+				eventAccountCreatedConsume(EventPublish, dbConnection)
 			default:
 				slog.Info("event type not mapped", "eventType", EventPublish.Type)
 			}
 		}
 	}()
 
-	log.Printf(" [*] Waiting for events. To exit press CTRL+C")
+	log.Printf("[*] Waiting for events. To exit press CTRL+C")
 	<-forever
+}
+
+func eventAccountCreatedConsume(EventPublish events.EventPublish, dbConnection *sql.DB) {
+	var obj events.AccountCreated
+	err := decodeEvent([]byte(EventPublish.Data), &obj)
+	if err != nil {
+		slog.Error("error decoding event", "error", err)
+		return
+	}
+
+	repository := repositories.NewAccountRepository(dbConnection)
+	handler := eventhandlers.NewAccountCreatedHandler(repository)
+
+	handler.Handler(obj)
+}
+
+func decodeEvent(data []byte, obj any) error {
+	return json.NewDecoder(bytes.NewReader(data)).Decode(obj)
 }
