@@ -23,3 +23,12 @@ func (m *MockAccountRepository) UpdateAccountBalance(account *domain.Account) er
 	args := m.Called(account)
 	return args.Error(0)
 }
+
+type MockMovementRepository struct {
+	mock.Mock
+}
+
+func (m *MockMovementRepository) CreateMovement(movement *domain.Movement) error {
+	args := m.Called(movement)
+	return args.Error(0)
+}

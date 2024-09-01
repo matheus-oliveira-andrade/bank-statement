@@ -22,3 +22,12 @@ CREATE TABLE IF NOT EXISTS accounts (
    Document VARCHAR(14),
    Balance BIGINT   
 );
+
+CREATE TABLE IF NOT EXISTS movements (
+   Id SERIAL PRIMARY KEY,
+   Type VARCHAR(15),
+   AccountNumber VARCHAR(15),
+   Value BIGINT,
+   ToAccountNumber VARCHAR(15),
+   CreatedAt TIMESTAMP
+);
