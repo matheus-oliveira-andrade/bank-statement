@@ -70,6 +70,8 @@ func main() {
 				eventFundsDepositedConsume(EventPublish, dbConnection)
 			case events.TransferRealizedEventKey:
 				eventTransferRealizedConsume(EventPublish, dbConnection)
+			case events.TransferReceivedEventKey:
+				eventTransferReceivedConsume(EventPublish, dbConnection)
 			default:
 				slog.Info("event type not mapped", "eventType", EventPublish.Type)
 			}
@@ -122,6 +124,22 @@ func eventTransferRealizedConsume(EventPublish events.EventPublish, dbConnection
 	movementRepository := repositories.NewMovementRepository(dbConnection)
 
 	handler := eventhandlers.NewTransferRealizedHandler(accountRepository, movementRepository)
+
+	handler.Handler(obj)
+}
+
+func eventTransferReceivedConsume(EventPublish events.EventPublish, dbConnection *sql.DB) {
+	var obj events.TransferReceived
+	err := decodeEvent([]byte(EventPublish.Data), &obj)
+	if err != nil {
+		slog.Error("error decoding event", "Type", EventPublish.Type, "error", err)
+		return
+	}
+
+	accountRepository := repositories.NewAccountRepository(dbConnection)
+	movementRepository := repositories.NewMovementRepository(dbConnection)
+
+	handler := eventhandlers.NewTransferReceivedHandler(accountRepository, movementRepository)
 
 	handler.Handler(obj)
 }
