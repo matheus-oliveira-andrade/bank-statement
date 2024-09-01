@@ -1,5 +1,7 @@
 package events
 
+const TransferRealizedEventKey = "TransferRealized"
+
 type TransferRealized struct {
 	FromNumber string `json:"fromNumber"`
 	ToNumber   string `json:"toNumber"`
