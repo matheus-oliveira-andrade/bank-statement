@@ -7,8 +7,8 @@ type TransferReceived struct {
 	Balance    int64  `json:"balance"`
 }
 
-func NewTransferReceived(fromNumber, toNumber string, value int64, balance int64) *TransferRealized {
-	return &TransferRealized{
+func NewTransferReceived(fromNumber, toNumber string, value int64, balance int64) *TransferReceived {
+	return &TransferReceived{
 		FromNumber: fromNumber,
 		ToNumber:   toNumber,
 		Value:      value,
