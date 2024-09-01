@@ -66,6 +66,8 @@ func main() {
 			switch EventPublish.Type {
 			case events.AccountCreatedEventKey:
 				eventAccountCreatedConsume(EventPublish, dbConnection)
+			case events.FundsDepositedEventKey:
+				eventFundsDepositedConsume(EventPublish, dbConnection)
 			default:
 				slog.Info("event type not mapped", "eventType", EventPublish.Type)
 			}
@@ -80,12 +82,28 @@ func eventAccountCreatedConsume(EventPublish events.EventPublish, dbConnection *
 	var obj events.AccountCreated
 	err := decodeEvent([]byte(EventPublish.Data), &obj)
 	if err != nil {
-		slog.Error("error decoding event", "error", err)
+		slog.Error("error decoding event", "type", EventPublish.Type, "error", err)
 		return
 	}
 
 	repository := repositories.NewAccountRepository(dbConnection)
 	handler := eventhandlers.NewAccountCreatedHandler(repository)
+
+	handler.Handler(obj)
+}
+
+func eventFundsDepositedConsume(EventPublish events.EventPublish, dbConnection *sql.DB) {
+	var obj events.FundsDeposited
+	err := decodeEvent([]byte(EventPublish.Data), &obj)
+	if err != nil {
+		slog.Error("error decoding event", "Type", EventPublish.Type, "error", err)
+		return
+	}
+
+	accountRepository := repositories.NewAccountRepository(dbConnection)
+	movementRepository := repositories.NewMovementRepository(dbConnection)
+
+	handler := eventhandlers.NewFundsDepositedHandler(accountRepository, movementRepository)
 
 	handler.Handler(obj)
 }
