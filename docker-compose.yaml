@@ -80,3 +80,9 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: broker_user
       RABBITMQ_DEFAULT_PASS: Abc6666
+  document-generator:
+    container_name: document-generator
+    image: gotenberg/gotenberg:8
+    restart: always
+    ports: 
+      - 3000:3000
