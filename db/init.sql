@@ -31,3 +31,13 @@ CREATE TABLE IF NOT EXISTS movements (
    ToAccountNumber VARCHAR(15),
    CreatedAt TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS statementsgeneration (
+   Id SERIAL PRIMARY KEY,
+   status VARCHAR(30),
+   AccountNumber VARCHAR(15),   
+   CreatedAt TIMESTAMP,
+   FinishedAt TIMESTAMP,
+   Error VARCHAR(255),
+   DocumentContent TEXT
+);
