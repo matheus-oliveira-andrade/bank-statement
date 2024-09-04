@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/repositories"
+	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/usecases"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/server/controllers"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/server/middleware"
 	"github.com/spf13/viper"
@@ -26,7 +28,14 @@ func (s *APIServer) SetupRoutes() {
 	baseGroup := s.Engine.Group(viper.GetString("serviceBaseRoute"))
 	controllers.NewHealthController().RegisterRoutes(baseGroup)
 
-	baseGroup.Group("v1")
+	v1Group := baseGroup.Group("v1")
+
+	statementGenerationRepository := repositories.NewStatementGenerationRepository(repositories.NewDBConnection())
+	accountRepository := repositories.NewAccountRepository(repositories.NewDBConnection())
+
+	triggerStatementUseCase := usecases.NewTriggerStatementGenerationUseCase(statementGenerationRepository, accountRepository)
+
+	controllers.NewStatementController(triggerStatementUseCase).RegisterRoutes(v1Group)
 }
 
 func (s *APIServer) SetupMiddlewares() {
