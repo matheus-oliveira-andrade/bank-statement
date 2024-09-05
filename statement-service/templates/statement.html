@@ -50,12 +50,12 @@
 
     <table class="transactions-table">
         <tbody>
-            {% for t in transactions %}
+            {% for m in movements %}
             <tr>
-                <td>{{ t.createdAt }}</td>
-                <td>{{ t.type }}</td>
-                <td>{{ t.destinationAccount }}</td>
-                <td>{{ t.amount }}</td>
+                <td>{{ m.createdAt }}</td>
+                <td>{{ m.type }}</td>
+                <td>{{ m.destinationAccount }}</td>
+                <td>{{ m.amount }}</td>
             </tr>
             {% endfor %}
         </tbody>
