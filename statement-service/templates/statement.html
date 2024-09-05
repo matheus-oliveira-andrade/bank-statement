@@ -1,16 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Example Template</title>
+    <title>Extrato Bancário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .transactions-table th, .transactions-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .transactions-table tr:nth-child(even) {
+            background-color: #f0f0f0; /* Cor cinza */
+        }
+        .transactions-title {
+            text-align: left;
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{.Title}}</h1>
-    <ul>
-        {{range .Items}}
-            <li>{{.}}</li>
-        {{end}}
-    </ul>
+
+    <div class="header">
+        <div>
+            <strong>Documento:</strong> <span>{{ .document }}</span>
+        </div>
+        <div>
+            <strong>Nome:</strong> <span>{{ .customerName }}</span>
+        </div>
+    </div>
+
+    <div class="transactions-title">
+        <strong>Transações</strong>
+    </div>
+
+    <table class="transactions-table">
+        <tbody>
+            {% for m in movements %}
+            <tr>
+                <td>{{ m.createdAt }}</td>
+                <td>{{ m.type }}</td>
+                <td>{{ m.destinationAccount }}</td>
+                <td>{{ m.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 </body>
 </html>
