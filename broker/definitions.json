@@ -54,6 +54,15 @@
     ],
     "exchanges": [
         {
+            "name": "statement",
+            "vhost": "/",
+            "type": "fanout",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+        },
+        {
             "name": "account",
             "vhost": "/",
             "type": "fanout",
@@ -66,6 +75,14 @@
     "bindings": [
         {
             "source": "account",
+            "vhost": "/",
+            "destination": "statement-service-queue",
+            "destination_type": "queue",
+            "routing_key": "",
+            "arguments": {}
+        },
+        {
+            "source": "statement",
             "vhost": "/",
             "destination": "statement-service-queue",
             "destination_type": "queue",
