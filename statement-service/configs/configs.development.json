@@ -17,5 +17,8 @@
     "host": "localhost",
     "port": "5672",
     "protocol": "amqp"
+  },
+  "documentGenerator": {
+    "baseUrl": "http://localhost:3000"
   }
 }

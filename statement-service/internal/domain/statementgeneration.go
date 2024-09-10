@@ -32,3 +32,15 @@ func NewStatementGeneration(accountNumber string) (*StatementGeneration, error) 
 		CreatedAt:     time.Now(),
 	}, nil
 }
+
+func (sg *StatementGeneration) SetAsGenerated(report string) {
+	sg.DocumentContent = report
+	sg.Status = StatementGenerationFinished
+	sg.FinishedAt = time.Now()
+}
+
+func (sg *StatementGeneration) SetAsGeneratedWithError(err error) {
+	sg.Error = err.Error()
+	sg.Status = StatementGenerationError
+	sg.FinishedAt = time.Now()
+}

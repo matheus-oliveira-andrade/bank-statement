@@ -37,10 +37,10 @@
 
     <div class="header">
         <div>
-            <strong>Documento:</strong> <span>{{ .document }}</span>
+            <strong>Documento:</strong> <span>{{ .Document }}</span>
         </div>
         <div>
-            <strong>Nome:</strong> <span>{{ .customerName }}</span>
+            <strong>Nome:</strong> <span>{{ .CustomerName }}</span>
         </div>
     </div>
 
@@ -50,14 +50,14 @@
 
     <table class="transactions-table">
         <tbody>
-            {% for m in movements %}
+            {{range .Movements}}
             <tr>
-                <td>{{ m.createdAt }}</td>
-                <td>{{ m.type }}</td>
-                <td>{{ m.destinationAccount }}</td>
-                <td>{{ m.amount }}</td>
+                <td>{{.CreatedAt}}</td>
+                <td>{{.Type}}</td>
+                <td>{{.DestinationAccount}}</td>
+                <td>{{.Amount}}</td>
             </tr>
-            {% endfor %}
+            {{end}}
         </tbody>
     </table>
 

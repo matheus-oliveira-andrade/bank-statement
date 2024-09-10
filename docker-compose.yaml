@@ -47,6 +47,8 @@ services:
         limits:
           cpus: '0.3'
           memory: 50M
+    depends_on:
+      - message-broker
   db:
     container_name: db
     build: 

@@ -25,7 +25,7 @@ func TestCreateStatementGeneration_Error(t *testing.T) {
 	}
 
 	mock.ExpectQuery(`INSERT INTO statementsgeneration`).
-		WithArgs(statementGeneration.Status, statementGeneration.AccountNumber, statementGeneration.CreatedAt).
+		WithArgs(statementGeneration.Status, statementGeneration.AccountNumber, statementGeneration.CreatedAt, statementGeneration.FinishedAt, statementGeneration.Error, statementGeneration.DocumentContent).
 		WillReturnError(sqlmock.ErrCancelled)
 
 	// act
@@ -53,7 +53,7 @@ func TestCreateStatementGeneration_Success(t *testing.T) {
 	}
 
 	mock.ExpectQuery(`INSERT INTO statementsgeneration`).
-		WithArgs(statementGeneration.Status, statementGeneration.AccountNumber, statementGeneration.CreatedAt).
+		WithArgs(statementGeneration.Status, statementGeneration.AccountNumber, statementGeneration.CreatedAt, statementGeneration.FinishedAt, statementGeneration.Error, statementGeneration.DocumentContent).
 		WillReturnRows(sqlmock.NewRows([]string{"Id"}).AddRow("1"))
 
 	// act
@@ -132,8 +132,8 @@ func TestGetStatementGeneration_Found(t *testing.T) {
 		DocumentContent: "PDF content",
 	}
 
-	mock.ExpectQuery(`SELECT AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE AccountNumber = \$1`).
-		WithArgs(accountNumber).
+	mock.ExpectQuery(`SELECT AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE AccountNumber = \$1 AND Status = \$2`).
+		WithArgs(accountNumber, domain.StatementGenerationRunnning).
 		WillReturnRows(sqlmock.NewRows([]string{"AccountNumber", "Status", "CreatedAt", "FinishedAt", "Error", "DocumentContent"}).
 			AddRow(expectedSG.AccountNumber, expectedSG.Status, expectedSG.CreatedAt, expectedSG.FinishedAt, expectedSG.Error, expectedSG.DocumentContent))
 
@@ -157,8 +157,8 @@ func TestGetStatementGeneration_NotFound(t *testing.T) {
 
 	accountNumber := "123456"
 
-	mock.ExpectQuery(`SELECT AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE AccountNumber = \$1`).
-		WithArgs(accountNumber).
+	mock.ExpectQuery(`SELECT AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE AccountNumber = \$1 AND Status = \$2`).
+		WithArgs(accountNumber, domain.StatementGenerationRunnning).
 		WillReturnRows(sqlmock.NewRows([]string{"AccountNumber", "Status", "CreatedAt", "FinishedAt", "Error", "DocumentContent"}))
 
 	// act
@@ -166,7 +166,7 @@ func TestGetStatementGeneration_NotFound(t *testing.T) {
 
 	// assert
 	assert.NoError(t, err)
-	assert.Nil(t, sg) // Nenhum resultado encontrado
+	assert.Nil(t, sg)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -181,8 +181,8 @@ func TestGetStatementGeneration_Error(t *testing.T) {
 
 	accountNumber := "123456"
 
-	mock.ExpectQuery(`SELECT AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE AccountNumber = \$1`).
-		WithArgs(accountNumber).
+	mock.ExpectQuery(`SELECT AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE AccountNumber = \$1 AND Status = \$2`).
+		WithArgs(accountNumber, domain.StatementGenerationRunnning).
 		WillReturnError(errors.New("query error"))
 
 	// act

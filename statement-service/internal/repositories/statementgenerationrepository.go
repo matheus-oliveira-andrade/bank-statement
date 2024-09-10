@@ -26,11 +26,11 @@ func NewStatementGenerationRepository(db *sql.DB) *StatementGenerationRepository
 
 func (r *StatementGenerationRepository) CreateStatementGeneration(statementGeneration *domain.StatementGeneration) (string, error) {
 	row := r.db.QueryRow(`
-	INSERT INTO statementsgeneration (Status, AccountNumber, CreatedAt)
-	VALUES ($1, $2, $3)
+	INSERT INTO statementsgeneration (Status, AccountNumber, CreatedAt, FinishedAt, Error, DocumentContent)
+	VALUES ($1, $2, $3, $4, $5, $6)
 	
 	RETURNING Id
-	`, statementGeneration.Status, statementGeneration.AccountNumber, statementGeneration.CreatedAt)
+	`, statementGeneration.Status, statementGeneration.AccountNumber, statementGeneration.CreatedAt, statementGeneration.FinishedAt, statementGeneration.Error, statementGeneration.DocumentContent)
 
 	var id string
 	err := row.Scan(&id)
@@ -57,8 +57,8 @@ func (r *StatementGenerationRepository) HasStatementGenerationRunning(accountNum
 }
 
 func (repo *StatementGenerationRepository) GetStatementGeneration(accountNumber string) (*domain.StatementGeneration, error) {
-	query := `SELECT AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE AccountNumber = $1`
-	row := repo.db.QueryRow(query, accountNumber)
+	query := `SELECT AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE AccountNumber = $1 AND Status = $2`
+	row := repo.db.QueryRow(query, accountNumber, domain.StatementGenerationRunnning)
 
 	var sg domain.StatementGeneration
 	err := row.Scan(&sg.AccountNumber, &sg.Status, &sg.CreatedAt, &sg.FinishedAt, &sg.Error, &sg.DocumentContent)
