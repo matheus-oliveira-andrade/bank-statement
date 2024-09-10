@@ -32,3 +32,8 @@ func (m *MockMovementRepository) CreateMovement(movement *domain.Movement) error
 	args := m.Called(movement)
 	return args.Error(0)
 }
+
+func (m *MockMovementRepository) GetMovements(number string) (*[]domain.Movement, error) {
+	args := m.Called(number)
+	return args.Get(0).(*[]domain.Movement), args.Error(1)
+}

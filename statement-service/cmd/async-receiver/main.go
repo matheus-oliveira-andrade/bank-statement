@@ -7,10 +7,13 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"net/http"
 
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/configs"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/eventhandlers"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/infrastructure/broker"
+	documentgenerator "github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/infrastructure/documentgenerator"
+	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/infrastructure/templatecompiler"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/logger"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/repositories"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/shared/events"
@@ -72,6 +75,8 @@ func main() {
 				eventTransferRealizedConsume(EventPublish, dbConnection)
 			case events.TransferReceivedEventKey:
 				eventTransferReceivedConsume(EventPublish, dbConnection)
+			case events.StatementGenerationRequestedEventKey:
+				eventStatementGenerationRequested(EventPublish, dbConnection)
 			default:
 				slog.Info("event type not mapped", "eventType", EventPublish.Type)
 			}
@@ -142,6 +147,30 @@ func eventTransferReceivedConsume(EventPublish events.EventPublish, dbConnection
 	handler := eventhandlers.NewTransferReceivedHandler(accountRepository, movementRepository)
 
 	handler.Handler(obj)
+}
+
+func eventStatementGenerationRequested(EventPublish events.EventPublish, dbConnection *sql.DB) {
+	var obj events.StatementGenerationRequested
+	err := decodeEvent([]byte(EventPublish.Data), &obj)
+	if err != nil {
+		slog.Error("error decoding event", "Type", EventPublish.Type, "error", err)
+		return
+	}
+
+	accountRepository := repositories.NewAccountRepository(dbConnection)
+	statementGenerationRepository := repositories.NewStatementGenerationRepository(dbConnection)
+	movementRepository := repositories.NewMovementRepository(dbConnection)
+	documentGenerationApi := documentgenerator.NewGenerateDocumentApi(http.Client{})
+	templateCompiler := templatecompiler.NewTemplateCompile()
+
+	handler := eventhandlers.NewStatementGenerationRequestedHandler(
+		accountRepository,
+		statementGenerationRepository,
+		movementRepository,
+		documentGenerationApi,
+		templateCompiler)
+
+	handler.Handle(obj)
 }
 
 func decodeEvent(data []byte, obj any) error {

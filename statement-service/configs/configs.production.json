@@ -17,5 +17,8 @@
     "host": "message-broker",
     "port": "5672",
     "protocol": "amqp"
+  },
+  "documentGenerator": {
+    "baseUrl": "http://document-generator:3000"
   }
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/infrastructure/broker"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/repositories"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/usecases"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/server/controllers"
@@ -32,8 +33,9 @@ func (s *APIServer) SetupRoutes() {
 
 	statementGenerationRepository := repositories.NewStatementGenerationRepository(repositories.NewDBConnection())
 	accountRepository := repositories.NewAccountRepository(repositories.NewDBConnection())
+	broker := broker.NewBroker(broker.BuildConnectionUrl())
 
-	triggerStatementUseCase := usecases.NewTriggerStatementGenerationUseCase(statementGenerationRepository, accountRepository)
+	triggerStatementUseCase := usecases.NewTriggerStatementGenerationUseCase(statementGenerationRepository, accountRepository, broker)
 
 	controllers.NewStatementController(triggerStatementUseCase).RegisterRoutes(v1Group)
 }

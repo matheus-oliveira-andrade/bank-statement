@@ -13,7 +13,9 @@ func TestHandle_StatementGenerationRunning(t *testing.T) {
 	// arrange
 	mockStatementRepo := new(usecases_mocks.MockStatementGenerationRepository)
 	mockAccountRepo := new(usecases_mocks.MockAccountRepository)
-	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo)
+	mockBroker := new(usecases_mocks.MockBroker)
+
+	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo, mockBroker)
 
 	acc := &domain.Account{
 		Number: "123456",
@@ -23,6 +25,8 @@ func TestHandle_StatementGenerationRunning(t *testing.T) {
 
 	accountNumber := "123456"
 	mockStatementRepo.On("HasStatementGenerationRunning", accountNumber).Return(true, nil)
+
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	result, err := useCase.Handle(accountNumber)
@@ -38,7 +42,9 @@ func TestHandle_ErrorCheckingGenerationRunning(t *testing.T) {
 	// arrange
 	mockStatementRepo := new(usecases_mocks.MockStatementGenerationRepository)
 	mockAccountRepo := new(usecases_mocks.MockAccountRepository)
-	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo)
+	mockBroker := new(usecases_mocks.MockBroker)
+
+	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo, mockBroker)
 
 	acc := &domain.Account{
 		Number: "123456",
@@ -48,6 +54,8 @@ func TestHandle_ErrorCheckingGenerationRunning(t *testing.T) {
 
 	accountNumber := "123456"
 	mockStatementRepo.On("HasStatementGenerationRunning", accountNumber).Return(false, assert.AnError)
+
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	result, err := useCase.Handle(accountNumber)
@@ -63,7 +71,9 @@ func TestHandle_ErrorCreatingStatementGeneration(t *testing.T) {
 	// arrange
 	mockStatementRepo := new(usecases_mocks.MockStatementGenerationRepository)
 	mockAccountRepo := new(usecases_mocks.MockAccountRepository)
-	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo)
+	mockBroker := new(usecases_mocks.MockBroker)
+
+	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo, mockBroker)
 
 	acc := &domain.Account{
 		Number: "123456",
@@ -74,6 +84,8 @@ func TestHandle_ErrorCreatingStatementGeneration(t *testing.T) {
 	accountNumber := "123456"
 	mockStatementRepo.On("HasStatementGenerationRunning", accountNumber).Return(false, nil)
 	mockStatementRepo.On("CreateStatementGeneration", mock.Anything).Return("", assert.AnError)
+
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	result, err := useCase.Handle(accountNumber)
@@ -89,7 +101,9 @@ func TestHandle_Success(t *testing.T) {
 	// arrange
 	mockStatementRepo := new(usecases_mocks.MockStatementGenerationRepository)
 	mockAccountRepo := new(usecases_mocks.MockAccountRepository)
-	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo)
+	mockBroker := new(usecases_mocks.MockBroker)
+
+	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo, mockBroker)
 
 	acc := &domain.Account{
 		Number: "123456",
@@ -102,6 +116,8 @@ func TestHandle_Success(t *testing.T) {
 	statementGeneration, _ := domain.NewStatementGeneration(accountNumber)
 	mockStatementRepo.On("HasStatementGenerationRunning", accountNumber).Return(false, nil)
 	mockStatementRepo.On("CreateStatementGeneration", statementGeneration).Return(triggerId, nil)
+
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	result, err := useCase.Handle(accountNumber)
@@ -116,11 +132,15 @@ func TestHandle_AccountNotFound(t *testing.T) {
 	// arrange
 	mockStatementRepo := new(usecases_mocks.MockStatementGenerationRepository)
 	mockAccountRepo := new(usecases_mocks.MockAccountRepository)
-	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo)
+	mockBroker := new(usecases_mocks.MockBroker)
+
+	useCase := NewTriggerStatementGenerationUseCase(mockStatementRepo, mockAccountRepo, mockBroker)
 
 	mockAccountRepo.On("GetAccountByNumber", mock.Anything).Return((*domain.Account)(nil), nil)
 
 	accountNumber := "123456"
+
+	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
 	// act
 	result, err := useCase.Handle(accountNumber)
