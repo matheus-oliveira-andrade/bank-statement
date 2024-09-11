@@ -36,8 +36,9 @@ func (s *APIServer) SetupRoutes() {
 	broker := broker.NewBroker(broker.BuildConnectionUrl())
 
 	triggerStatementUseCase := usecases.NewTriggerStatementGenerationUseCase(statementGenerationRepository, accountRepository, broker)
+	getStatementUseCase := usecases.NewGetStatementGenerationUseCase(statementGenerationRepository)
 
-	controllers.NewStatementController(triggerStatementUseCase).RegisterRoutes(v1Group)
+	controllers.NewStatementController(triggerStatementUseCase, getStatementUseCase).RegisterRoutes(v1Group)
 }
 
 func (s *APIServer) SetupMiddlewares() {

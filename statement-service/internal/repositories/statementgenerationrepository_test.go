@@ -266,3 +266,85 @@ func TestUpdateStatementGeneration_Error(t *testing.T) {
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
+
+func TestGetStatementGenerationById_Found(t *testing.T) {
+	// arrange
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	repo := NewStatementGenerationRepository(db)
+
+	id := "123456"
+	expectedSG := domain.StatementGeneration{
+		Id:              id,
+		AccountNumber:   "123456",
+		Status:          "running",
+		CreatedAt:       time.Now(),
+		FinishedAt:      time.Now().Add(1 * time.Hour),
+		Error:           "none",
+		DocumentContent: "PDF content",
+	}
+
+	mock.ExpectQuery(`SELECT Id, AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE Id = \$1`).
+		WithArgs(id).
+		WillReturnRows(sqlmock.NewRows([]string{"Id", "AccountNumber", "Status", "CreatedAt", "FinishedAt", "Error", "DocumentContent"}).
+			AddRow(id, expectedSG.AccountNumber, expectedSG.Status, expectedSG.CreatedAt, expectedSG.FinishedAt, expectedSG.Error, expectedSG.DocumentContent))
+
+	// act
+	sg, err := repo.GetStatementGenerationById(id)
+
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, &expectedSG, sg)
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestGetStatementGenerationById_NotFound(t *testing.T) {
+	// arrange
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	repo := NewStatementGenerationRepository(db)
+
+	id := "123456"
+
+	mock.ExpectQuery(`SELECT Id, AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE Id = \$1`).
+		WithArgs(id).
+		WillReturnRows(sqlmock.NewRows([]string{"Id", "AccountNumber", "Status", "CreatedAt", "FinishedAt", "Error", "DocumentContent"}))
+
+	// act
+	sg, err := repo.GetStatementGenerationById(id)
+
+	// assert
+	assert.NoError(t, err)
+	assert.Nil(t, sg)
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestGetStatementGenerationById_Error(t *testing.T) {
+	// arrange
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	repo := NewStatementGenerationRepository(db)
+
+	id := "123456"
+
+	mock.ExpectQuery(`SELECT Id, AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE Id = \$1`).
+		WithArgs(id).
+		WillReturnError(errors.New("query error"))
+
+	// act
+	sg, err := repo.GetStatementGenerationById(id)
+
+	// assert
+	assert.Error(t, err)
+	assert.Nil(t, sg)
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
