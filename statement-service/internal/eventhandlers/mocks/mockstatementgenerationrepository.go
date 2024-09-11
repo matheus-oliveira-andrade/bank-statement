@@ -28,3 +28,8 @@ func (m *MockStatementGenerationRepository) UpdateStatementGeneration(statementG
 	args := m.Called(statementGeneration)
 	return args.Error(0)
 }
+
+func (m *MockStatementGenerationRepository) GetStatementGenerationById(id string) (*domain.StatementGeneration, error) {
+	args := m.Called(id)
+	return args.Get(0).(*domain.StatementGeneration), args.Error(1)
+}

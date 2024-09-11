@@ -12,6 +12,7 @@ type StatementGenerationRepositoryInterface interface {
 	HasStatementGenerationRunning(accountNumber string) (bool, error)
 	GetStatementGeneration(accountNumber string) (*domain.StatementGeneration, error)
 	UpdateStatementGeneration(statementGeneration *domain.StatementGeneration) error
+	GetStatementGenerationById(id string) (*domain.StatementGeneration, error)
 }
 
 type StatementGenerationRepository struct {
@@ -93,4 +94,21 @@ func (repo *StatementGenerationRepository) UpdateStatementGeneration(statementGe
 	}
 
 	return nil
+}
+
+func (repo *StatementGenerationRepository) GetStatementGenerationById(id string) (*domain.StatementGeneration, error) {
+	query := `SELECT Id, AccountNumber, Status, CreatedAt, FinishedAt, Error, DocumentContent FROM statementsgeneration WHERE Id = $1`
+	row := repo.db.QueryRow(query, id)
+
+	var sg domain.StatementGeneration
+	err := row.Scan(&sg.Id, &sg.AccountNumber, &sg.Status, &sg.CreatedAt, &sg.FinishedAt, &sg.Error, &sg.DocumentContent)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, errors.Wrap(err, "failed to scan statement generation")
+	}
+
+	return &sg, nil
 }

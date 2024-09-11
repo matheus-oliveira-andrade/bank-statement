@@ -1,11 +1,11 @@
 package models
 
 type TriggerStatementGenerationResponse struct {
-	TriggerId string
+	FileBase64 string `json:"fileBase64"`
 }
 
-func NewTriggerStatementGenerationResponse(triggerId string) *TriggerStatementGenerationResponse {
+func NewTriggerStatementGenerationResponse(fileBase64 string) *TriggerStatementGenerationResponse {
 	return &TriggerStatementGenerationResponse{
-		TriggerId: triggerId,
+		FileBase64: fileBase64,
 	}
 }
