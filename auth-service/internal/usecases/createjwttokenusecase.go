@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 )
 
 type CreateJWTTokenUseCaseInterface interface {
-	Handle(accountNumber string) (string, error)
+	Handle() (string, error)
 }
 
 type CreateJWTTokenUseCase struct {
@@ -19,8 +20,8 @@ func NewCreateJWTTokenUseCase() *CreateJWTTokenUseCase {
 	return &CreateJWTTokenUseCase{}
 }
 
-func (*CreateJWTTokenUseCase) Handle(accountNumber string) (string, error) {
-	slog.Info("Creating JWT token", "accountNumber", accountNumber)
+func (*CreateJWTTokenUseCase) Handle() (string, error) {
+	slog.Info("Creating JWT token")
 
 	audience := viper.GetString("authSettings.audience")
 	scopes := viper.GetStringSlice("authSettings.scopes")
@@ -31,7 +32,7 @@ func (*CreateJWTTokenUseCase) Handle(accountNumber string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"exp":    expirationTime,
-		"sub":    accountNumber,
+		"sub":    uuid.New().String(),
 		"aud":    audience,
 		"scopes": scopes,
 	}
@@ -46,7 +47,7 @@ func (*CreateJWTTokenUseCase) Handle(accountNumber string) (string, error) {
 		return "", err
 	}
 
-	slog.Info("Token created", "accountNumber", accountNumber)
+	slog.Info("Token created")
 
 	return tokenGenerated, nil
 }

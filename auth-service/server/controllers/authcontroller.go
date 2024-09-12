@@ -1,12 +1,10 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/internal/usecases"
-	"github.com/matheus-oliveira-andrade/bank-statement/auth-service/server/models"
 )
 
 type AuthController struct {
@@ -24,10 +22,7 @@ func (controller *AuthController) RegisterRoutes(routerGroup *gin.RouterGroup) {
 }
 
 func (controller *AuthController) CreateToken(ctx *gin.Context) {
-	tokenRequest := models.TokenRequest{}
-	json.NewDecoder(ctx.Request.Body).Decode(&tokenRequest)
-
-	token, err := controller.CreateTokenUseCase.Handle(tokenRequest.AccountNumber)
+	token, err := controller.CreateTokenUseCase.Handle()
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
