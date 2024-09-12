@@ -36,11 +36,7 @@ make down
 
 Generate auth token
 ```bash
-curl --location 'http://localhost:8080/auth/v1/token' \
---header 'Content-Type: application/json' \
---data '{
-    "accountNumber": "666666"
-}'
+curl --location --request POST 'http://localhost:8080/auth/v1/token'
 ```
 
 Create an account
@@ -71,7 +67,7 @@ curl --location 'http://localhost:8081/account/v1/account/1/transfer' \
 --header 'Content-Type: application/json' \
 --data '{
     "toNumber": "2",
-    "value": 750
+    "value": 7500
 }'
 ```
 
