@@ -13,8 +13,7 @@ func TestHandle(t *testing.T) {
 		accountNumber string
 	}{
 		{
-			name:          "check JWT creation",
-			accountNumber: "123456-78",
+			name: "check JWT creation",
 		},
 	}
 
@@ -28,7 +27,7 @@ func TestHandle(t *testing.T) {
 				"bankstatement",
 			})
 
-			token, err := NewCreateJWTTokenUseCase().Handle(tc.accountNumber)
+			token, err := NewCreateJWTTokenUseCase().Handle()
 
 			assert.Nil(t, err)
 			assert.NotNil(t, token)
