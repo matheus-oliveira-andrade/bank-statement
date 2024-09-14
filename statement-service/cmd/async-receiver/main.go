@@ -17,6 +17,7 @@ import (
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/logger"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/repositories"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/shared/events"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 func main() {
@@ -45,7 +46,7 @@ func main() {
 	consumedMessages, err := ch.Consume(
 		"statement-service-queue",
 		"",
-		true,
+		false,
 		false,
 		false,
 		false,
@@ -60,31 +61,37 @@ func main() {
 
 	go func() {
 		for consumedMessage := range consumedMessages {
-			var EventPublish events.EventPublish
-			err := decodeEvent(consumedMessage.Body, &EventPublish)
-			if err != nil {
-				fmt.Println(err)
-			}
+			tryHandleMessage(consumedMessage, dbConnection)
 
-			switch EventPublish.Type {
-			case events.AccountCreatedEventKey:
-				eventAccountCreatedConsume(EventPublish, dbConnection)
-			case events.FundsDepositedEventKey:
-				eventFundsDepositedConsume(EventPublish, dbConnection)
-			case events.TransferRealizedEventKey:
-				eventTransferRealizedConsume(EventPublish, dbConnection)
-			case events.TransferReceivedEventKey:
-				eventTransferReceivedConsume(EventPublish, dbConnection)
-			case events.StatementGenerationRequestedEventKey:
-				eventStatementGenerationRequested(EventPublish, dbConnection)
-			default:
-				slog.Info("event type not mapped", "eventType", EventPublish.Type)
-			}
+			consumedMessage.Ack(false)
 		}
 	}()
 
 	log.Printf("[*] Waiting for events. To exit press CTRL+C")
 	<-forever
+}
+
+func tryHandleMessage(consumedMessage amqp091.Delivery, dbConnection *sql.DB) {
+	var EventPublish events.EventPublish
+	err := decodeEvent(consumedMessage.Body, &EventPublish)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	switch EventPublish.Type {
+	case events.AccountCreatedEventKey:
+		eventAccountCreatedConsume(EventPublish, dbConnection)
+	case events.FundsDepositedEventKey:
+		eventFundsDepositedConsume(EventPublish, dbConnection)
+	case events.TransferRealizedEventKey:
+		eventTransferRealizedConsume(EventPublish, dbConnection)
+	case events.TransferReceivedEventKey:
+		eventTransferReceivedConsume(EventPublish, dbConnection)
+	case events.StatementGenerationRequestedEventKey:
+		eventStatementGenerationRequested(EventPublish, dbConnection)
+	default:
+		slog.Info("event type not mapped", "eventType", EventPublish.Type)
+	}
 }
 
 func eventAccountCreatedConsume(EventPublish events.EventPublish, dbConnection *sql.DB) {
