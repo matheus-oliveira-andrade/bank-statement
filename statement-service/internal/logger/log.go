@@ -5,13 +5,14 @@ import (
 	"os"
 )
 
-func SetupLogger() {
-  jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-    Level: slog.LevelDebug,
-  })
+func SetupLogger(serviceName string) {
+	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	})
 
-  defaultLogger := slog.New(jsonHandler)
+	defaultLogger := slog.New(jsonHandler)
+	defaultLogger = defaultLogger.With("service", serviceName)
 
-  slog.SetDefault(defaultLogger)
+	slog.SetDefault(defaultLogger)
 }
-

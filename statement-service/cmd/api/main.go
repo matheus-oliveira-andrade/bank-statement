@@ -10,7 +10,7 @@ import (
 func main() {
 	configs.InitConfigFile()
 
-	logger.SetupLogger()
+	logger.SetupLogger(viper.GetString("serviceName"))
 
 	s := server.NewApiServer(viper.GetInt("port"))
 	s.SetupMiddlewares()
