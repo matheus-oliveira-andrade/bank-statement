@@ -1,5 +1,6 @@
 {
   "port": 8080,
+  "serviceName": "account-service",	
   "serviceBaseRoute": "account",
   "authSettings": {
     "secret": "4REWQ1-123AAA"
