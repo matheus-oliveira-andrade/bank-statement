@@ -1,6 +1,7 @@
 {
   "port": 8080,
   "serviceBaseRoute": "statement",
+  "serviceName": "statement-service",
   "authSettings": {
     "secret": "4REWQ1-123AAA"
   },

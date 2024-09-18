@@ -18,11 +18,12 @@ import (
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/internal/repositories"
 	"github.com/matheus-oliveira-andrade/bank-statement/statement-service/shared/events"
 	"github.com/rabbitmq/amqp091-go"
+	"github.com/spf13/viper"
 )
 
 func main() {
 	configs.InitConfigFile()
-	logger.SetupLogger()
+	logger.SetupLogger(viper.GetString("serviceName"))
 
 	brokerConn, err := broker.NewConnection(broker.BuildConnectionUrl())
 	if err != nil {
