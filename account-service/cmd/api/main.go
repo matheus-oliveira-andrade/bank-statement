@@ -33,7 +33,7 @@ func initConfigFile() {
 func main() {
 	initConfigFile()
 
-	logger.SetupLogger()
+	logger.SetupLogger(viper.GetString("serviceName"))
 
 	s := server.NewApiServer(viper.GetInt("port"))
 	s.SetupMiddlewares()
