@@ -1,5 +1,6 @@
 {
   "port": 8080,
+  "servicename": "auth-service",
   "serviceBaseRoute": "auth",
   "authSettings": {
       "expirationHours" : 1,
