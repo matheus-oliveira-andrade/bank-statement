@@ -1,0 +1,25 @@
+name: golang build and test
+description: build and test golang project
+
+inputs:
+  working-dir:
+    description: "Directory of project"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      - shell: bash
+        name: Install dependencies
+        run: go mod tidy
+        working-directory: ${{ inputs.working-dir }}
+
+      - shell: bash
+        name: Build
+        run: go build -v ./...
+        working-directory: ${{ inputs.working-dir }}
+
+      - shell: bash 
+        name: Run tests
+        run: go test -v ./...
+        working-directory: ${{ inputs.working-dir }}
