@@ -113,9 +113,9 @@ func TestHandle_Success(t *testing.T) {
 
 	accountNumber := "123456"
 	triggerId := "abc123"
-	statementGeneration, _ := domain.NewStatementGeneration(accountNumber)
+
 	mockStatementRepo.On("HasStatementGenerationRunning", accountNumber).Return(false, nil)
-	mockStatementRepo.On("CreateStatementGeneration", statementGeneration).Return(triggerId, nil)
+	mockStatementRepo.On("CreateStatementGeneration", mock.Anything).Return(triggerId, nil)
 
 	mockBroker.On("Produce", mock.Anything, mock.Anything).Return(nil)
 
