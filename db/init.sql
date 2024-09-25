@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 CREATE TABLE IF NOT EXISTS movements (
    Id SERIAL PRIMARY KEY,
    Type VARCHAR(15),
-   AccountNumber VARCHAR(15), --
+   AccountNumber VARCHAR(15),
    Value BIGINT,
    ToAccountNumber VARCHAR(15),
    CreatedAt TIMESTAMP
