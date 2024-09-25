@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS accounts (
    UpdatedAt TIMESTAMP
 );
 
+CREATE INDEX accounts_Document_idx ON accounts (Document);
+
 CREATE DATABASE statementdb;
 
 \c statementdb
@@ -32,6 +34,8 @@ CREATE TABLE IF NOT EXISTS movements (
    CreatedAt TIMESTAMP
 );
 
+CREATE INDEX movements_AccountNumber_idx ON movements (AccountNumber);
+
 CREATE TABLE IF NOT EXISTS statementsgeneration (
    Id SERIAL PRIMARY KEY,
    status VARCHAR(30),
@@ -41,3 +45,5 @@ CREATE TABLE IF NOT EXISTS statementsgeneration (
    Error VARCHAR(255),
    DocumentContent TEXT
 );
+
+CREATE INDEX statementsgeneration_AccountNumber_idx ON statementsgeneration (AccountNumber);
