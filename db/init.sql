@@ -14,6 +14,11 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 CREATE INDEX accounts_Document_idx ON accounts (Document);
 
+CREATE TABLE IF NOT EXISTS idempotencykeys (
+   Key VARCHAR(40) PRIMARY KEY,
+   CreatedAt TIMESTAMP
+);
+
 CREATE DATABASE statementdb;
 
 \c statementdb
