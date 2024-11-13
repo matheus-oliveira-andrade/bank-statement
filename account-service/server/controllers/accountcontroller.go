@@ -99,7 +99,7 @@ func (c *AccountController) depositAccountHandler(ctx *gin.Context) {
 		return
 	}
 
-	err := c.depositAccountUseCase.Handle(req.Number, req.Value)
+	err := c.depositAccountUseCase.Handle(req.Number, req.Value, req.IdempotencyKey)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errorMessage": err.Error(),
