@@ -40,7 +40,7 @@ func (s *APIServer) SetupRoutes() {
 	createAccountUseCase := usecases.NewCreateAccountUseCase(accountRepository, broker)
 	getAccountUseCase := usecases.NewGetAccountUseCase(accountRepository)
 	depositUseCase := usecases.NewDepositAccountUseCase(accountRepository, broker, idempotencyKeysRepository)
-	transferUseCase := usecases.NewTransferAccountUseCase(accountRepository, broker)
+	transferUseCase := usecases.NewTransferAccountUseCase(accountRepository, broker, idempotencyKeysRepository)
 
 	accountController := controllers.NewAccountController(createAccountUseCase, getAccountUseCase, depositUseCase, transferUseCase)
 

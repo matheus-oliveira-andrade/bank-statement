@@ -10,22 +10,38 @@ import (
 )
 
 type TransferAccountUseCaseInterface interface {
-	Handle(fromNumber string, toNumber string, value int64) error
+	Handle(fromNumber string, toNumber string, value int64, idempotencyKey string) error
 }
 
 type TransferAccountUseCase struct {
-	accountRepository repositories.AccountRepositoryInterface
-	broker            broker.BrokerInterface
+	accountRepository         repositories.AccountRepositoryInterface
+	broker                    broker.BrokerInterface
+	idempotencyKeysRepository repositories.IdempotencyKeysRepositoryInterface
 }
 
-func NewTransferAccountUseCase(accountRepository repositories.AccountRepositoryInterface, broker broker.BrokerInterface) *TransferAccountUseCase {
+func NewTransferAccountUseCase(
+	accountRepository repositories.AccountRepositoryInterface,
+	broker broker.BrokerInterface,
+	idempotencyKeysRepository repositories.IdempotencyKeysRepositoryInterface) *TransferAccountUseCase {
 	return &TransferAccountUseCase{
-		accountRepository: accountRepository,
-		broker:            broker,
+		accountRepository:         accountRepository,
+		broker:                    broker,
+		idempotencyKeysRepository: idempotencyKeysRepository,
 	}
 }
 
-func (us *TransferAccountUseCase) Handle(fromNumber string, toNumber string, value int64) error {
+func (us *TransferAccountUseCase) Handle(fromNumber string, toNumber string, value int64, idempotencyKey string) error {
+	hasKey, err := us.idempotencyKeysRepository.HasKey(idempotencyKey)
+	if err != nil {
+		slog.Error("Error getting idempotencyKey", "error", err)
+		return err
+	}
+
+	if hasKey {
+		slog.Error("idempotency key already processed", "idempotencyKey", idempotencyKey)
+		return errors.New("idempotency key already processed")
+	}
+
 	fromAcc, err := us.accountRepository.GetAccountByNumber(fromNumber)
 	if err != nil {
 		slog.Error("Error getting from account by document", "error", err)
@@ -74,7 +90,14 @@ func (us *TransferAccountUseCase) Handle(fromNumber string, toNumber string, val
 		return err
 	}
 
-	return err
+	err = us.idempotencyKeysRepository.CreateKey(idempotencyKey)
+	if err != nil {
+		slog.Error("error saving idempotency key used", "error", err, "idempotencyKey", idempotencyKey)
+		return err
+	}
+
+	slog.Info("Transfer realized", "fromAccNumber", fromAcc.Number, "toAccNumber", toAcc.Number, "idempotencyKey", idempotencyKey)
+	return nil
 }
 
 func (us *TransferAccountUseCase) produceEventTransferRealized(fromNumber string, toNumber string, value int64, fromBalance int64) error {

@@ -123,7 +123,7 @@ func (c *AccountController) transferAccountHandler(ctx *gin.Context) {
 		return
 	}
 
-	err := c.transferAccountUseCase.Handle(req.FromNumber, req.ToNumber, req.Value)
+	err := c.transferAccountUseCase.Handle(req.FromNumber, req.ToNumber, req.Value, req.IdempotencyKey)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errorMessage": err.Error(),
