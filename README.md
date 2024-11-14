@@ -45,7 +45,7 @@ curl --location 'http://localhost:8081/account/v1/account' \
 --header 'Authorization: Bearer {{TOKEN}}' \
 --header 'Content-Type: application/json' \
 --data '{
-    "name": "Andrade",
+    "name": "Bob",
     "document": "01234567890"
 }'
 ```
@@ -56,7 +56,8 @@ curl --location 'http://localhost:8081/account/v1/account/1/deposit' \
 --header 'Authorization: Bearer {{TOKEN}}' \
 --header 'Content-Type: application/json' \
 --data '{
-    "value": 15000
+    "value": 15000,    
+    "idempotencyKey": "0003045b-ece6-4af0-b932-9cc0ebf72541"
 }'
 ```
 
@@ -67,7 +68,8 @@ curl --location 'http://localhost:8081/account/v1/account/1/transfer' \
 --header 'Content-Type: application/json' \
 --data '{
     "toNumber": "2",
-    "value": 7500
+    "value": 7500,    
+    "idempotencyKey": "1103045b-ece6-4af0-b932-9cc0ebf72541"
 }'
 ```
 
@@ -77,7 +79,7 @@ curl --location --request POST 'http://localhost:8082/statement/v1/statement/1' 
 --header 'Authorization: Bearer {{TOKEN}}'
 ```
 
-Get statement generation result
+Get statements document generated 
 ```bash
 curl --location 'http://localhost:8082/statement/v1/statement/1' \
 --header 'Authorization: Bearer {{TOKEN}}'
