@@ -33,13 +33,14 @@ func (s *APIServer) SetupRoutes() {
 
 	var db = repositories.NewDBConnection()
 	accountRepository := repositories.NewAccountRepository(db)
+	idempotencyKeysRepository := repositories.NewIdempotencyKeysRepository(db)
 
 	var broker = broker.NewBroker(broker.BuildConnectionUrl())
 
 	createAccountUseCase := usecases.NewCreateAccountUseCase(accountRepository, broker)
 	getAccountUseCase := usecases.NewGetAccountUseCase(accountRepository)
-	depositUseCase := usecases.NewDepositAccountUseCase(accountRepository, broker)
-	transferUseCase := usecases.NewTransferAccountUseCase(accountRepository, broker)
+	depositUseCase := usecases.NewDepositAccountUseCase(accountRepository, broker, idempotencyKeysRepository)
+	transferUseCase := usecases.NewTransferAccountUseCase(accountRepository, broker, idempotencyKeysRepository)
 
 	accountController := controllers.NewAccountController(createAccountUseCase, getAccountUseCase, depositUseCase, transferUseCase)
 

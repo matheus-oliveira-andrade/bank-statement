@@ -10,22 +10,38 @@ import (
 )
 
 type DepositAccountUseCaseInterface interface {
-	Handle(number string, value int64) error
+	Handle(number string, value int64, idempotencyKey string) error
 }
 
 type DepositAccountUseCase struct {
-	accountRepository repositories.AccountRepositoryInterface
-	broker            broker.BrokerInterface
+	accountRepository         repositories.AccountRepositoryInterface
+	broker                    broker.BrokerInterface
+	idempotencyKeysRepository repositories.IdempotencyKeysRepositoryInterface
 }
 
-func NewDepositAccountUseCase(accountRepository repositories.AccountRepositoryInterface, broker broker.BrokerInterface) *DepositAccountUseCase {
+func NewDepositAccountUseCase(
+	accountRepository repositories.AccountRepositoryInterface,
+	broker broker.BrokerInterface,
+	idempotencyKeysRepository repositories.IdempotencyKeysRepositoryInterface) *DepositAccountUseCase {
 	return &DepositAccountUseCase{
-		accountRepository: accountRepository,
-		broker:            broker,
+		accountRepository:         accountRepository,
+		broker:                    broker,
+		idempotencyKeysRepository: idempotencyKeysRepository,
 	}
 }
 
-func (us *DepositAccountUseCase) Handle(number string, value int64) error {
+func (us *DepositAccountUseCase) Handle(number string, value int64, idempotencyKey string) error {
+	hasKey, err := us.idempotencyKeysRepository.HasKey(idempotencyKey)
+	if err != nil {
+		slog.Error("Error getting idempotencyKey", "error", err)
+		return err
+	}
+
+	if hasKey {
+		slog.Error("idempotency key already processed", "idempotencyKey", idempotencyKey)
+		return errors.New("idempotency key already processed")
+	}
+
 	acc, err := us.accountRepository.GetAccountByNumber(number)
 	if err != nil {
 		slog.Error("Error getting account by document", "error", err)
@@ -40,6 +56,10 @@ func (us *DepositAccountUseCase) Handle(number string, value int64) error {
 	acc.Deposit(value)
 
 	err = us.accountRepository.UpdateAccountBalance(acc)
+	if err != nil {
+		slog.Error("error updating account balance", "error", err)
+		return err
+	}
 
 	event, err := events.NewEventPublish(events.NewFundsDeposited(acc.Number, value))
 	if err != nil {
@@ -52,6 +72,14 @@ func (us *DepositAccountUseCase) Handle(number string, value int64) error {
 		slog.Error("error producing event", "error", err)
 		return err
 	}
+
+	err = us.idempotencyKeysRepository.CreateKey(idempotencyKey)
+	if err != nil {
+		slog.Error("error saving idempotency key used", "error", err, "idempotencyKey", idempotencyKey)
+		return err
+	}
+
+	slog.Info("Deposit created", "accountNumber", acc.Number, "value", value, "idempotencyKey", idempotencyKey)
 
 	return err
 }
