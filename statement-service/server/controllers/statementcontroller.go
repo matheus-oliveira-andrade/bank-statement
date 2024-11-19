@@ -73,5 +73,5 @@ func (c *StatementController) getStatementGeneration(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, models.NewTriggerStatementGenerationResponse(file))
+	ctx.JSON(http.StatusOK, models.NewGetStatementGenerationResponse(file))
 }
